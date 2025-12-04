@@ -1,0 +1,24 @@
+version: '3.8'
+
+services:
+  mysqldb:
+    image: mysql:8.0
+    container_name: mysqldb_container
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: inventario_db
+      MYSQL_ROOT_PASSWORD: root
+    # YA NO NECESITAMOS VOLUMES DE INIT.SQL
+    # La base de datos nace vacía y Java la llenará.
+
+  backend-app:
+    build: .
+    ports:
+      - "8080:8080"
+    depends_on:
+      - mysqldb
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/nombre_de_tu_db?allowPublicKeyRetrieval=true&useSSL=false
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: root
