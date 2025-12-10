@@ -4,7 +4,7 @@ import com.app.Inventario.model.dto.BienRequestDTO;
 import com.app.Inventario.model.dto.BienResponseDTO;
 import com.app.Inventario.model.entity.Bien;
 import com.app.Inventario.model.entity.Categoria;
-import com.app.Inventario.model.entity.EstadoBien;
+import com.app.Inventario.model.enums.EstadoBien;
 import org.springframework.stereotype.Component;
 
 @Component

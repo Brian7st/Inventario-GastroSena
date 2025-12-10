@@ -1,6 +1,7 @@
 package com.app.Inventario.model.entity;
 
 
+import com.app.Inventario.model.enums.EstadoBien;
 import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
