@@ -1,6 +1,6 @@
 package com.app.Inventario.model.dto;
 
-import com.app.Inventario.model.entity.EstadoBien;
+import com.app.Inventario.model.enums.EstadoBien;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.*;
