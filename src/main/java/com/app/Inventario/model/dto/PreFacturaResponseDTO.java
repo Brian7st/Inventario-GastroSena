@@ -1,6 +1,7 @@
 package com.app.Inventario.model.dto;
 
 
+import com.app.Inventario.model.entity.ProgramaFormacion;
 import com.app.Inventario.model.enums.EstadoPreFactura;
 import lombok.Data;
 
@@ -21,5 +22,5 @@ public class PreFacturaResponseDTO {
     private BigDecimal totalGeneral;
 
 
-    private ProgramaResponseDTO programa;
+    private ProgramaFormacion programa;
 }
