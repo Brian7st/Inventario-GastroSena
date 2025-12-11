@@ -8,9 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 
 @Entity
@@ -31,7 +29,8 @@ public class PreFactura {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "programa_id", referencedColumnName = "id")
-    private ProgamaFormacion progamaFormacion;
+    private ProgramaFormacion programaFormacion;
+
     @Column(name ="instructor_nombre", length = 150)
     private String nombreInstructor;
 

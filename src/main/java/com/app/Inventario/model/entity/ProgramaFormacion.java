@@ -14,7 +14,7 @@ import java.util.List;
 @Getter @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class ProgamaFormacion {
+public class ProgramaFormacion {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
