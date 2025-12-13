@@ -13,4 +13,7 @@ public class ProgramaRequestDTO {
 
     @Pattern(regexp = "ACTIVO|INACTIVO", message = "El estado debe ser ACTIVO o INACTIVO")
     private EstadoPrograma estadoPrograma;
+
+
+
 }

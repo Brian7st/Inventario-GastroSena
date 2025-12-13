@@ -7,4 +7,6 @@ public class ProgramaResponseDTO {
     private String nombre;
     private String codigoFicha;
     private EstadoPrograma estadoPrograma;
+
+
 }

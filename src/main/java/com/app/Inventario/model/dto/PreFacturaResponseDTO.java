@@ -1,26 +1,26 @@
-package com.app.Inventario.model.dto;
+    package com.app.Inventario.model.dto;
 
 
-import com.app.Inventario.model.entity.ProgramaFormacion;
-import com.app.Inventario.model.enums.EstadoPreFactura;
-import lombok.Data;
+    import com.app.Inventario.model.entity.ProgramaFormacion;
+    import com.app.Inventario.model.enums.EstadoPreFactura;
+    import lombok.Data;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
+    import java.math.BigDecimal;
+    import java.time.LocalDateTime;
 
-@Data
+    @Data
 
-public class PreFacturaResponseDTO {
-    private Long id;
-    private String numero;
-    private LocalDateTime fecha;
+    public class PreFacturaResponseDTO {
+        private Long id;
+        private String numero;
+        private LocalDateTime fecha;
 
-    private String instructorNombre;
-    private String instructorIdentificacion;
+        private String instructorNombre;
+        private String instructorIdentificacion;
 
-    private EstadoPreFactura estado;
-    private BigDecimal totalGeneral;
+        private EstadoPreFactura estado;
+        private BigDecimal totalGeneral;
 
 
-    private ProgramaFormacion programa;
-}
+        private ProgramaFormacion programa;
+    }
