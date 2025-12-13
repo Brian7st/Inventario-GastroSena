@@ -7,4 +7,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ProgramaFormacionRepository extends JpaRepository<ProgramaFormacion, Long> {
 
+    boolean existsByCodigoFicha(String codigoFicha);
 }

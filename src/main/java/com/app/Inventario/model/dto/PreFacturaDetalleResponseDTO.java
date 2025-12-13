@@ -1,6 +1,5 @@
 package com.app.Inventario.model.dto;
 
-import com.app.Inventario.model.entity.Bien;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,12 +13,20 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 @Schema (name = "PreFacturaDetalleResponseDTO",
-        description = "DTO de respuesta que representa una línea de detalle, incluyendo la entidad Bien asociada.")
+        description = "DTO de respuesta que representa una línea de detalle, incluyendo los datos esenciales del Bien.")
 
 public class PreFacturaDetalleResponseDTO {
 
     private Long id;
-    private Bien bien;
+
+    @Schema(description = "ID del Bien asociado a este detalle.")
+    private Long bienId;
+
+    @Schema(description = "Código del bien.")
+    private String codigoBien;
+
+    @Schema(description = "Nombre del bien.")
+    private String nombreBien;
 
     @Schema( description = "Cantidad del bien solicitada")
     private BigDecimal cantidad;

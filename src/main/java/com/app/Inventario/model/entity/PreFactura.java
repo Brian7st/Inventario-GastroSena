@@ -9,6 +9,8 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
 
 
 @Entity
@@ -43,6 +45,5 @@ public class PreFactura {
 
     @Column(name = "total_general", precision = 15, scale = 2)
     private BigDecimal totalPrefactura;
-
 
 }
