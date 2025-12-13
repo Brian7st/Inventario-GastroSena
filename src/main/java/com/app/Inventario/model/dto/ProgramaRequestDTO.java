@@ -15,12 +15,5 @@ public class ProgramaRequestDTO {
     private EstadoPrograma estadoPrograma;
 
 
-    public String getCodigoFicha() {
-    }
 
-    public String getNombre() {
-    }
-
-    public EstadoPrograma getEstadoPrograma() {
-    }
 }

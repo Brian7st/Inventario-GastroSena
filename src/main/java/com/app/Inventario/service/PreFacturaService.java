@@ -89,7 +89,7 @@ public class PreFacturaService {
             } else if (nuevoStock.compareTo(BigDecimal.ZERO) == 0) {
                 bien.setEstado(EstadoBien.SIN_STOCK);
             }
-            bienRepository.save(bien); // Guardar el Bien con el nuevo stock
+            bienRepository.save(bien);
         }
 
         preFacturaGuardada.setTotalPrefactura(totalGeneralCalculado);

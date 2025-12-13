@@ -24,6 +24,9 @@ public class PreFacturaRequestDTO {
     @Min(value = 0, message = "El total no puede ser negativo")
     private BigDecimal totalGeneral;
 
-    public PreFacturaDetalleRequestDTO[] getDetalles() {
-    }
+    @NotNull(message = "Los detalles de la prefactura son obligatorios")
+    private PreFacturaDetalleRequestDTO[] detalles;
+
+
+
 }

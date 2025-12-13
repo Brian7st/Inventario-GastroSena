@@ -46,4 +46,7 @@ public class PreFactura {
     @Column(name = "total_general", precision = 15, scale = 2)
     private BigDecimal totalPrefactura;
 
+    @OneToMany(mappedBy = "preFactura", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Collection<PreFacturaDetalle> detalles = new ArrayList<>();
+
 }
