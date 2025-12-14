@@ -42,17 +42,21 @@ public class SolicitudGilService {
 
 
     @Transactional
-    public SolicitudGilResponseDTO actualizarSolicitud (Long id, SolicitudGil solicitudActualizada){
-        SolicitudGil solicitudExistente = solicitudGilRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("no se puede actualizar, solicitud no encontrada"));
-                        solicitudExistente.setEstado(solicitudActualizada.getEstado());
-                        solicitudExistente.setItems(solicitudActualizada.getItems());
+    public SolicitudGilResponseDTO actualizarSolicitud(Long id, SolicitudGil solicitudActualizada) {
+        SolicitudGil solicitud = solicitudGilRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
 
+        if (solicitud.getEstado() != EstadoSolicitud.PENDIENTE) {
+            throw new RuntimeException("Solo se puede modificar una solicitud en estado PENDIENTE");
+        }
 
-                        SolicitudGil solicitudGuardada = solicitudGilRepository.save(solicitudExistente);
+        // SOLO campos propios de la solicitud
+        solicitud.setEstado(solicitudActualizada.getEstado());
+        solicitud.setItems(solicitudActualizada.getItems());
 
-                        return solicitudGilMapper.toResponseDto(solicitudGuardada);
-
+        return solicitudGilMapper.toResponseDto(
+                solicitudGilRepository.save(solicitud)
+        );
     }
 
 
@@ -62,15 +66,17 @@ public class SolicitudGilService {
     }
 
     @Transactional
-    public void BorrarSolicitud(Long id){
-        if (!solicitudGilRepository.existsById(id)){
-            throw new RuntimeException("Solicitud no encontrada");
-        }else{
-            solicitudGilRepository.deleteById(id);
+    public void BorrarSolicitud(Long id) {
+        SolicitudGil solicitud = solicitudGilRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
+
+        if (solicitud.getEstado() != EstadoSolicitud.PENDIENTE) {
+            throw new RuntimeException("Solo se pueden eliminar solicitudes en estado PENDIENTE");
         }
 
-
+        solicitudGilRepository.delete(solicitud);
     }
+
 
 
 
