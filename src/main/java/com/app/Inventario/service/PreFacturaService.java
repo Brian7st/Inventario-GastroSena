@@ -107,7 +107,7 @@ public class PreFacturaService {
     }
 
     @Transactional(readOnly = true)
-    public PreFacturaResponseDTO obtenerPorId(long id){
+    public PreFactura obtenerPorId(long id){
         PreFactura preFactura = preFacturaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("PreFactura no encontrada con ID: " + id));
 

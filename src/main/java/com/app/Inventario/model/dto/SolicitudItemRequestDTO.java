@@ -6,14 +6,15 @@ import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
 
-@Schema(name = "SolicitudItemDTO",
+@Schema(name = "SolicitudItemRequestDTO",
 description = "DTO utilizado para generar solicitudes de bienes")
-public class SolicitudItemDTO {
+
+public class SolicitudItemRequestDTO {
 
     @NotNull(message = "el ID del bien no puede ser nulo")
-    private long BienId;
+    private Long bienId;
 
-    @NotNull(message = "la cantidad es reqeurida para solicitar bienes ")
+    @NotNull(message = "la cantidad es requerida para solicitar bienes ")
     @DecimalMin(value = "0.01", message = "la cantidad tiene que ser mayor de cero")
     private BigDecimal cantidad;
 
