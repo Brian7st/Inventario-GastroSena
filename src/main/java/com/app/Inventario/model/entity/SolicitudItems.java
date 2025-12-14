@@ -3,7 +3,6 @@ package com.app.Inventario.model.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
 
 @Entity

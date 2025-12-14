@@ -5,8 +5,10 @@ import com.app.Inventario.mapper.SolicitudItemMapper;
 import com.app.Inventario.model.dto.SolicitudGilResponseDTO;
 import com.app.Inventario.model.entity.PreFactura;
 import com.app.Inventario.model.entity.SolicitudGil;
+import com.app.Inventario.model.entity.SolicitudItems;
 import com.app.Inventario.model.enums.EstadoSolicitud;
 import com.app.Inventario.repository.SolicitudGilRepository;
+import com.app.Inventario.repository.SolicitudItemsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +21,7 @@ public class SolicitudGilService {
     private final SolicitudGilRepository solicitudGilRepository;
     private final SolicitudGilMapper solicitudGilMapper;
     private final PreFacturaService preFacturaService;
+
 
 
     @Transactional
@@ -68,6 +71,9 @@ public class SolicitudGilService {
 
 
     }
+
+
+
 
     @Transactional
     public SolicitudGilResponseDTO asociarPreFactura (Long solicitudId, Long preFacturaId){
