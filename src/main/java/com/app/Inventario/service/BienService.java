@@ -5,10 +5,15 @@ import com.app.Inventario.mapper.BienMapper;
 import com.app.Inventario.model.dto.BienRequestDTO;
 import com.app.Inventario.model.dto.BienResponseDTO;
 import com.app.Inventario.model.entity.Bien;
-import com.app.Inventario.model.entity.Categoria;
+import com.app.Inventario.model.entityMaestras.Categoria;
+import com.app.Inventario.model.entityMaestras.Impuesto;
+import com.app.Inventario.model.entityMaestras.UnidadMedida;
 import com.app.Inventario.model.enums.EstadoBien;
 import com.app.Inventario.repository.BienRepository;
 import com.app.Inventario.repository.CategoriaRepository;
+import com.app.Inventario.repository.ImpuestoRepository;
+import com.app.Inventario.repository.UnidadMedidaRepository;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +27,11 @@ public class BienService {
 
     private final BienRepository bienRepository;
     private final CategoriaRepository categoriaRepository;
+    private final UnidadMedidaRepository unidadMedidaRepository;
+    private final ImpuestoRepository impuestoRepository;
+
     private final BienMapper bienMapper;
+    private final EntityManager entityManager;
 
     @Transactional
     public BienResponseDTO crearBien(BienRequestDTO request) {
@@ -33,7 +42,13 @@ public class BienService {
         Categoria categoria = categoriaRepository.findById(request.getCategoriaId())
                 .orElseThrow(() -> new RuntimeException("Categoria no encontrada con el ID" + request.getCategoriaId()));
 
-        Bien nuevoBien = bienMapper.toEntity(request, categoria);
+        UnidadMedida unidadMedida = unidadMedidaRepository.findById(request.getUnidadId())
+                .orElseThrow(() -> new RuntimeException("Unidad de medida no encontrada con el id" + request.getUnidadId()));
+
+        Impuesto impuesto = impuestoRepository.findById(request.getImpuestoId())
+                .orElseThrow(()-> new RuntimeException("Impuesto no encontrado con el id" + request.getImpuestoId()));
+
+        Bien nuevoBien = bienMapper.toEntity(request,categoria,unidadMedida,impuesto);
         Bien bienGuardado = bienRepository.save(nuevoBien);
 
         return bienMapper.toResponseDto(bienGuardado);
@@ -68,7 +83,13 @@ public class BienService {
         Categoria categoria = categoriaRepository.findById(request.getCategoriaId())
                 .orElseThrow(() -> new RuntimeException("Categoria no encontrada ID" + request.getCategoriaId()));
 
-        bienMapper.updateEntityFromDTO(bienExistente,request,categoria);
+        UnidadMedida unidadMedida = unidadMedidaRepository.findById(request.getUnidadId())
+                .orElseThrow(() -> new RuntimeException("Unidad de medida no encontrada con el id" + request.getUnidadId()));
+
+        Impuesto impuesto = impuestoRepository.findById(request.getImpuestoId())
+                .orElseThrow(()-> new RuntimeException("Impuesto no encontrado con el id" + request.getImpuestoId()));
+
+        bienMapper.updateEntityFromDTO(bienExistente,request,categoria,unidadMedida,impuesto);
         Bien bienActualizado = bienRepository.save(bienExistente);
 
         return  bienMapper.toResponseDto(bienActualizado);
@@ -80,6 +101,4 @@ public class BienService {
         bien.setEstado(EstadoBien.ELIMINADO);
         bienRepository.save(bien);
     }
-
-
 }

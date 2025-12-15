@@ -2,92 +2,79 @@ package com.app.Inventario.model.dto;
 
 import com.app.Inventario.model.enums.EstadoBien;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 
-@Setter
-@Getter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Schema(
         name = "BienResponseDTO",
-        description = "DTO que representa la información completa de un bien almacenado en el inventario."
+        description = "DTO de salida con cálculos contables e información detallada."
 )
 public class BienResponseDTO {
 
-    @Schema(
-            description = "Identificador único del bien",
-            example = "12"
-    )
-    private Long id;
+    @Schema(description = "ID interno del sistema", example = "12")
+    private Integer idBien;
 
-    @Schema(
-            description = "Código único del bien",
-            example = "UT-CH-001"
-    )
+    @Schema(description = "Código SKU", example = "UT-CH-001")
     private String codigo;
 
-    @Schema(
-            description = "Nombre del bien",
-            example = "Cuchillo Chef 8 pulgadas"
-    )
+    @Schema(description = "Ubicación en almacén", example = "EST-B-2")
+    private String codAlmacen;
+
+    @Schema(description = "Nombre del bien", example = "Cuchillo Chef 8 pulgadas")
     private String nombre;
 
-    @Schema(
-            description = "ID de la categoría a la que pertenece el bien",
-            example = "5"
-    )
-    private Long categoriaId;
+    private String descripcion;
 
-    @Schema(
-            description = "Nombre de la categoría asociada al bien",
-            example = "Utensilios de Cocina"
-    )
+    @Schema(description = "ID de la categoría", example = "5")
+    private Integer categoriaId;
+
+    @Schema(description = "Nombre de la categoría", example = "Utensilios")
     private String categoriaNombre;
 
-    @Schema(
-            description = "Unidad de medida utilizada",
-            example = "Unidad"
-    )
-    private String unidadMedida;
+    @Schema(description = "ID de la unidad de medida", example = "1")
+    private Integer unidadId;
 
-    @Schema(
-            description = "Valor unitario del bien",
-            example = "35000.00"
-    )
+    @Schema(description = "Nombre/Abreviatura de la unidad", example = "Unidad (UND)")
+    private String unidadNombre;
+
+
+
+    @Schema(description = "ID del impuesto asociado", example = "2")
+    private Integer impuestoId;
+
+    @Schema(description = "Nombre del impuesto", example = "IVA General")
+    private String impuestoNombre;
+
+    @Schema(description = "Porcentaje del impuesto aplicado", example = "19.00")
+    private BigDecimal impuestoPorcentaje;
+
+
+
+    @Schema(description = "Precio Base (Sin Impuesto)", example = "35000.00")
     private BigDecimal valorUnitario;
 
-    @Schema(
-            description = "Porcentaje de IVA aplicado al bien",
-            example = "19.0"
-    )
-    private BigDecimal porcentajeIva;
+    // Este campo es calculado en Java para ayudar al Front (Precio Base + % Impuesto)
+    @Schema(description = "Precio de Venta con Impuesto incluido (Calculado)", example = "41650.00")
+    private BigDecimal precioVentaFinal;
 
-    @Schema(
-            description = "Valor total unitario del bien con IVA incluido",
-            example = "41650.00"
-    )
-    private BigDecimal valorConIva;
+    // --- Inventario (Datos Críticos) ---
 
-    @Schema(
-            description = "Cantidad actual disponible del bien en inventario",
-            example = "50"
-    )
+    @Schema(description = "Stock físico actual (Calculado por DB/Trigger)", example = "50.00")
     private BigDecimal stockActual;
 
-    @Schema(
-            description = "Stock mínimo permitido antes de generar alertas",
-            example = "10"
-    )
+    @Schema(description = "Valor total del inventario (Stock * Costo). Campo STORED de DB", example = "1750000.00")
+    private BigDecimal valorTotalStock;
+
+    @Schema(description = "Punto de reorden", example = "10.00")
     private BigDecimal stockMinimo;
 
-    @Schema(
-            description = "Estado actual del bien",
-            example = "ACTIVO"
-    )
+    @Schema(description = "Estado del inventario", example = "DISPONIBLE")
     private EstadoBien estado;
+
+    private Boolean activo;
 }
