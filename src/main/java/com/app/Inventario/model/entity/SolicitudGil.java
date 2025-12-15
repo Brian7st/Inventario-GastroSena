@@ -67,7 +67,7 @@ SolicitudGil {
     private FacturaGlobal facturaGlobal;
 
     @Enumerated(EnumType.STRING)
-    private EstadoSolicitud estado = EstadoSolicitud.PENDIENTE.;
+    private EstadoSolicitud estado = EstadoSolicitud.PENDIENTE;
 
     @OneToMany(mappedBy = "solicitudGil", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Cuentadante> cuentadantes;
