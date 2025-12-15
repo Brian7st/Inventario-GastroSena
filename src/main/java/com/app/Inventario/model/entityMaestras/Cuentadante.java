@@ -1,5 +1,6 @@
-package com.app.Inventario.model.entity;
+package com.app.Inventario.model.entityMaestras;
 
+import com.app.Inventario.model.entity.SolicitudGil;
 import jakarta.persistence.*;
 import lombok.Data;
 

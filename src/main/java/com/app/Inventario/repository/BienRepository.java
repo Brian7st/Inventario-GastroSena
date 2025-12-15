@@ -3,10 +3,12 @@ package com.app.Inventario.repository;
 import com.app.Inventario.model.entity.Bien;
 import com.app.Inventario.model.enums.EstadoBien;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
 
+@Repository
 public interface BienRepository extends JpaRepository<Bien, Long> {
     Optional<Bien> findByCodigo(String codigo);
 

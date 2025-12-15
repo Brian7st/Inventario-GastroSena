@@ -7,78 +7,63 @@ import lombok.*;
 
 import java.math.BigDecimal;
 
-@Setter
-@Getter
+@Data // @Data incluye Getter, Setter, ToString, etc.
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 @Schema(
         name = "BienRequestDTO",
-        description = "DTO utilizado para crear o actualizar bienes en el inventario."
+        description = "DTO para registrar o actualizar bienes. Se usan IDs para referenciar catálogos."
 )
 public class BienRequestDTO {
 
-    @Schema(
-            description = "Código único del bien dentro del inventario",
-            example = "UT-CH-001"
-    )
+    @Schema(description = "Código SKU único o código de barras", example = "UT-CH-001")
     @NotBlank(message = "El código es obligatorio")
+    @Size(max = 50, message = "El código no puede exceder 50 caracteres")
     private String codigo;
 
-    @Schema(
-            description = "Nombre del bien",
-            example = "Cuchillo Chef 8 pulgadas"
-    )
+    @Schema(description = "Ubicación física o código secundario", example = "PASILLO-A-01")
+    @Size(max = 50, message = "El código de almacén no puede exceder 50 caracteres")
+    private String codAlmacen;
+
+    @Schema(description = "Nombre comercial del bien", example = "Cuchillo Chef 8 pulgadas")
     @NotBlank(message = "El nombre es obligatorio")
+    @Size(max = 200, message = "El nombre no puede exceder 200 caracteres")
     private String nombre;
 
-    @Schema(
-            description = "ID de la categoría a la que pertenece el bien",
-            example = "5"
-    )
-    @NotNull(message = "Debes especificar el ID de la categoría")
-    @Positive(message = "El ID de la categoría debe ser un número positivo")
-    private Long categoriaId;
+    @Schema(description = "Descripción detallada del producto", example = "Acero inoxidable, mango ergonómico...")
+    private String descripcion;
 
-    @Schema(
-            description = "Unidad de medida utilizada para el bien",
-            example = "Unidad"
-    )
-    @NotBlank(message = "La unidad de medida es obligatoria")
-    private String unidadMedida;
+    // --- RELACIONES (Usamos IDs, no nombres) ---
 
-    @Schema(
-            description = "Valor unitario del bien",
-            example = "35000.00"
-    )
+    @Schema(description = "ID de la categoría", example = "5")
+    @NotNull(message = "El ID de la categoría es obligatorio")
+    @Positive
+    private Integer categoriaId;
+
+    @Schema(description = "ID de la unidad de medida (Tabla unidades_medida)", example = "1")
+    @NotNull(message = "El ID de la unidad de medida es obligatorio")
+    @Positive
+    private Integer unidadId;
+
+    @Schema(description = "ID de la regla de impuesto (Tabla impuestos)", example = "2")
+    @NotNull(message = "El ID del impuesto es obligatorio")
+    @Positive
+    private Integer impuestoId;
+
+
+    @Schema(description = "Precio Base SIN Impuestos", example = "35000.00")
     @NotNull(message = "El valor unitario es obligatorio")
-    @DecimalMin(value = "0.0", inclusive = true, message = "El valor no puede ser negativo")
+    @DecimalMin(value = "0.0", inclusive = true)
     private BigDecimal valorUnitario;
 
-    @Schema(
-            description = "Porcentaje de IVA aplicado al bien",
-            example = "19.0"
-    )
-    @DecimalMin(value = "0.0", inclusive = true, message = "El IVA no puede ser negativo")
-    private BigDecimal porcentajeIva;
-
-    @Schema(
-            description = "Cantidad actual disponible en inventario",
-            example = "50"
-    )
-    @DecimalMin(value = "0.0", inclusive = true, message = "El stock no puede ser negativo")
-    private BigDecimal stockActual;
-
-    @Schema(
-            description = "Cantidad mínima recomendada antes de generar alerta",
-            example = "10"
-    )
-    @DecimalMin(value = "0.0", inclusive = true, message = "El stock mínimo no puede ser negativo")
+    @Schema(description = "Stock Mínimo para alertas", example = "10")
+    @DecimalMin(value = "0.0", inclusive = true)
     private BigDecimal stockMinimo;
 
-    @Schema(
-            description = "Estado actual del bien",
-            example = "ACTIVO"
-    )
+    @Schema(description = "Estado manual del bien (Opcional)", example = "DISPONIBLE")
     private EstadoBien estado;
 
+    @Schema(description = "Define si el bien está habilitado para transacciones", example = "true")
+    private Boolean activo;
 }

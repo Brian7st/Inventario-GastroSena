@@ -3,80 +3,116 @@ package com.app.Inventario.mapper;
 import com.app.Inventario.model.dto.BienRequestDTO;
 import com.app.Inventario.model.dto.BienResponseDTO;
 import com.app.Inventario.model.entity.Bien;
-import com.app.Inventario.model.entity.Categoria;
+import com.app.Inventario.model.entityMaestras.Categoria;
+import com.app.Inventario.model.entityMaestras.Impuesto;
+import com.app.Inventario.model.entityMaestras.UnidadMedida;
 import com.app.Inventario.model.enums.EstadoBien;
 import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 @Component
 public class BienMapper {
 
-    public BienResponseDTO toResponseDto(Bien bien){
-        if(bien == null){
+
+    public BienResponseDTO toResponseDto(Bien bien) {
+        if (bien == null) {
             return null;
         }
 
-        BienResponseDTO dto = new BienResponseDTO();
+        // Cálculo auxiliar para el Precio Final (Visualización)
+        // Precio Base * (1 + (Porcentaje / 100))
+        BigDecimal precioFinal = BigDecimal.ZERO;
+        BigDecimal porcentajeImpuesto = BigDecimal.ZERO;
 
-        dto.setId(bien.getId());
-        dto.setCodigo(bien.getCodigo());
-        dto.setNombre(bien.getNombre());
-        dto.setUnidadMedida(bien.getUnidadMedida());
-        dto.setValorUnitario(bien.getValorUnitario());
-        dto.setPorcentajeIva(bien.getPorcentajeIva());
-        dto.setValorConIva(bien.getValorConIva()); // calculado de la BD
-        dto.setStockActual(bien.getStockActual());
-        dto.setStockMinimo(bien.getStockMinimo());
-        dto.setEstado(bien.getEstado());
-
-        if(bien.getCategoria() != null){
-            dto.setCategoriaId(bien.getCategoria().getId());
-            dto.setCategoriaNombre(bien.getCategoria().getNombre());
+        if (bien.getImpuesto() != null && bien.getValorUnitario() != null) {
+            porcentajeImpuesto = bien.getImpuesto().getPorcentaje();
+            // Convertimos 19.00 a 0.19
+            BigDecimal factor = porcentajeImpuesto.divide(new BigDecimal("100"), 4, RoundingMode.HALF_UP);
+            BigDecimal montoImpuesto = bien.getValorUnitario().multiply(factor);
+            precioFinal = bien.getValorUnitario().add(montoImpuesto);
         }
 
-        return dto;
+        return BienResponseDTO.builder()
+                .idBien(bien.getId())
+                .codigo(bien.getCodigo())
+                .codAlmacen(bien.getCodAlmacen())
+                .nombre(bien.getNombre())
+                .descripcion(bien.getDescripcion())
+
+                .categoriaId(bien.getCategoria() != null ? bien.getCategoria().getId() : null)
+                .categoriaNombre(bien.getCategoria() != null ? bien.getCategoria().getNombre() : null)
+
+                .unidadId(bien.getUnidadMedida() != null ? bien.getUnidadMedida().getIdUnidad() : null)
+                .unidadNombre(bien.getUnidadMedida() != null ? bien.getUnidadMedida().getAbreviatura() : null)
+
+                .impuestoId(bien.getImpuesto() != null ? bien.getImpuesto().getId() : null)
+                .impuestoNombre(bien.getImpuesto() != null ? bien.getImpuesto().getNombre() : null)
+                .impuestoPorcentaje(porcentajeImpuesto)
+
+
+                .valorUnitario(bien.getValorUnitario())
+                .precioVentaFinal(precioFinal)
+
+
+                .stockActual(bien.getStockActual())
+                .valorTotalStock(bien.getValorTotalStock())
+                .stockMinimo(bien.getStockMinimo())
+                .estado(bien.getEstado())
+                .activo(bien.getActivo())
+                .build();
     }
 
-    public Bien toEntity(BienRequestDTO dto, Categoria categoria){
 
-        if(dto == null){
+    public Bien toEntity(BienRequestDTO dto, Categoria categoria, UnidadMedida unidad, Impuesto impuesto) {
+        if (dto == null) {
             return null;
         }
 
-        Bien bien = new Bien();
+        return Bien.builder()
+                .codigo(dto.getCodigo())
+                .codAlmacen(dto.getCodAlmacen())
+                .nombre(dto.getNombre())
+                .descripcion(dto.getDescripcion())
 
-        bien.setCodigo(dto.getCodigo());
-        bien.setNombre(dto.getNombre());
-        bien.setUnidadMedida(dto.getUnidadMedida());
-        bien.setValorUnitario(dto.getValorUnitario());
-        bien.setPorcentajeIva(dto.getPorcentajeIva());
-        bien.setStockActual(dto.getStockActual());
-        bien.setStockMinimo(dto.getStockMinimo());
-        bien.setCategoria(categoria);
+                .categoria(categoria)
+                .unidadMedida(unidad)
+                .impuesto(impuesto)
 
-        if(dto.getEstado() != null){
-            bien.setEstado(dto.getEstado());
-        }else{
-            bien.setEstado(EstadoBien.DISPONIBLE);
-        }
+                .valorUnitario(dto.getValorUnitario())
+                .stockMinimo(dto.getStockMinimo())
 
-        return bien;
 
+                .estado(dto.getEstado()!= null ? dto.getEstado() : EstadoBien.DISPONIBLE)
+                .activo(dto.getActivo() != null ? dto.getActivo() : true)
+                .build();
     }
 
-    public void updateEntityFromDTO(Bien bienExistente, BienRequestDTO dto, Categoria nuevaCategoria){
+    public void updateEntityFromDTO(Bien bienExistente, BienRequestDTO dto,
+                                    Categoria nuevaCategoria,
+                                    UnidadMedida nuevaUnidad,
+                                    Impuesto nuevoImpuesto) {
+
         bienExistente.setCodigo(dto.getCodigo());
+        bienExistente.setCodAlmacen(dto.getCodAlmacen());
         bienExistente.setNombre(dto.getNombre());
-        bienExistente.setUnidadMedida(dto.getUnidadMedida());
+        bienExistente.setDescripcion(dto.getDescripcion());
+
+        // Actualizamos relaciones
+        if (nuevaCategoria != null) bienExistente.setCategoria(nuevaCategoria);
+        if (nuevaUnidad != null)    bienExistente.setUnidadMedida(nuevaUnidad);
+        if (nuevoImpuesto != null)  bienExistente.setImpuesto(nuevoImpuesto);
+
         bienExistente.setValorUnitario(dto.getValorUnitario());
-        bienExistente.setPorcentajeIva(dto.getPorcentajeIva());
-        bienExistente.setStockActual(dto.getStockActual());
         bienExistente.setStockMinimo(dto.getStockMinimo());
 
-        bienExistente.setCategoria(nuevaCategoria);
 
         if (dto.getEstado() != null) {
             bienExistente.setEstado(dto.getEstado());
         }
+        if (dto.getActivo() != null) {
+            bienExistente.setActivo(dto.getActivo());
+        }
     }
-
 }
