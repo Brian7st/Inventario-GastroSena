@@ -1,5 +1,6 @@
 package com.app.Inventario.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -22,6 +23,7 @@ public class PreFacturaDetalle{
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name ="pre_factura_id",nullable = false)
+    @JsonIgnore
     private PreFactura preFactura;
 
     @ManyToOne(fetch = FetchType.EAGER)

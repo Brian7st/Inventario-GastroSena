@@ -1,7 +1,7 @@
 package com.app.Inventario.controller;
 
-import com.app.Inventario.model.dto.FacturaGlobalRequestDTO;
-import com.app.Inventario.model.dto.FacturaGlobalResponseDTO;
+import com.app.Inventario.model.dto.request.FacturaGlobalRequestDTO;
+import com.app.Inventario.model.dto.response.FacturaGlobalResponseDTO;
 import com.app.Inventario.service.FacturaGlobalService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;

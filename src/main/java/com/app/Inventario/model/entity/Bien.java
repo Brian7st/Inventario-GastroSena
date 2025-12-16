@@ -25,7 +25,7 @@ public class Bien  {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
     @Column(nullable = false, unique = true, length = 50)
     private String codigo;
@@ -56,6 +56,7 @@ public class Bien  {
 
 
     @Column(name = "stock_actual", precision = 15, scale = 2)
+    @Builder.Default
     private BigDecimal stockActual = BigDecimal.ZERO;
 
     @Column(name = "stock_minimo", precision = 15, scale = 2)
@@ -72,6 +73,7 @@ public class Bien  {
     private LocalDateTime fechaCreacion;
 
     @Enumerated(EnumType.STRING)
-    @Column(columnDefinition = "ENUM('DISPONIBLE','BAJO STOCK','SIN STOCK','ELIMINADO') DEFAULT 'DISPONIBLE'")
-    private EstadoBien estado = EstadoBien.DISPONIBLE;
+    @Column(columnDefinition = "ENUM('DISPONIBLE','BAJO_STOCK','SIN_STOCK','ELIMINADO') DEFAULT 'SIN_STOCK'")
+    @Builder.Default
+    private EstadoBien estado = EstadoBien.SIN_STOCK;
 }

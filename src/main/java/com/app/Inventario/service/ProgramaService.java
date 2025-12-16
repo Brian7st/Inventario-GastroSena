@@ -1,8 +1,8 @@
 package com.app.Inventario.service;
 
 import com.app.Inventario.mapper.ProgramaMapper;
-import com.app.Inventario.model.dto.ProgramaRequestDTO;
-import com.app.Inventario.model.dto.ProgramaResponseDTO;
+import com.app.Inventario.model.dto.request.ProgramaRequestDTO;
+import com.app.Inventario.model.dto.response.ProgramaResponseDTO;
 import com.app.Inventario.model.entity.ProgramaFormacion;
 import com.app.Inventario.model.enums.EstadoPrograma;
 import com.app.Inventario.repository.ProgramaFormacionRepository;

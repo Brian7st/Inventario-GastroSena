@@ -1,7 +1,7 @@
 package com.app.Inventario.mapper;
 
-import com.app.Inventario.model.dto.ConciliacionDetalleResponseDTO;
-import com.app.Inventario.model.dto.ConciliacionResponseDTO;
+import com.app.Inventario.model.dto.response.ConciliacionDetalleResponseDTO;
+import com.app.Inventario.model.dto.response.ConciliacionResponseDTO;
 import com.app.Inventario.model.entity.Conciliacion;
 import com.app.Inventario.model.entity.ConciliacionDetalle;
 import org.springframework.stereotype.Component;

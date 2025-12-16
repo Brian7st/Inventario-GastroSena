@@ -1,26 +1,25 @@
 package com.app.Inventario.mapper;
 
-import com.app.Inventario.model.dto.SolicitudGilResponseDTO;
-import com.app.Inventario.model.entity.Cuentadante;
+import com.app.Inventario.model.dto.request.SolicitudGilRequestDTO;
+import com.app.Inventario.model.dto.response.SolicitudGilResponseDTO;
 import com.app.Inventario.model.entity.SolicitudGil;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
 
 @Component
+@RequiredArgsConstructor
 public class SolicitudGilMapper {
 
-    @Autowired
-    private SolicitudItemMapper solicitudItemMapper;
-    @Autowired
-    private CuentadanteMapper cuentadanteMapper;
+
+    private final SolicitudItemMapper solicitudItemMapper;
+    private final CuentadanteMapper cuentadanteMapper;
 
 
-
-    public static SolicitudGilResponseDTO toResponseDto(SolicitudGil solicitudGil){
+    public SolicitudGilResponseDTO toResponseDto(SolicitudGil solicitudGil){
         if (solicitudGil == null){
             return null;
         }
@@ -33,6 +32,7 @@ public class SolicitudGilMapper {
         dto.setCodigoRegional(solicitudGil.getCodigoRegional());
         dto.setNombreRegional(solicitudGil.getNombreRegional());
         dto.setCodigoCentroCostos(solicitudGil.getCodigoCentroCostos());
+        dto.setNombreCentroCostos(solicitudGil.getNombreCentroCostos());
         dto.setJefeOficina(solicitudGil.getJefeOficina());
         dto.setTipoCuentadante(solicitudGil.getTipoCuentadante());
         dto.setDestinoBienes(solicitudGil.getDestinoBienes());
@@ -43,22 +43,48 @@ public class SolicitudGilMapper {
         dto.setCuentadantes(cuentadanteMapper.toResponseDtos(solicitudGil.getCuentadantes()));
         dto.setItems(solicitudItemMapper.toResponseDtos(solicitudGil.getItems()));
 
-
-
-
-
         return dto;
     }
 
+    // --- Mapeo de Lista a Response DTOs ---
     public List<SolicitudGilResponseDTO> toResponseDtos (List<SolicitudGil> solicitudes){
         if (solicitudes == null){
             return null;
-        }else{
-            return solicitudes.stream()
-                    .map(this::toResponseDto)
-                    .collect(Collectors.toList());
+        }
+        return solicitudes.stream()
+                .map(this::toResponseDto)
+                .collect(Collectors.toList());
+    }
+
+
+    public SolicitudGil toEntity(SolicitudGilRequestDTO dto) {
+        if (dto == null) {
+            return null;
+        }
+
+        return SolicitudGil.builder()
+                .codigo(dto.getCodigoSolicitud())
+                .jefeOficina(dto.getJefeOficina())
+                .fichaCaracterizacion(dto.getFichaCaracterizacion())
+                .build();
+    }
+
+
+    public void updateEntityFromDto(SolicitudGil solicitudExistente, SolicitudGilRequestDTO dto) {
+
+
+        if (dto.getCodigoSolicitud() != null) {
+            solicitudExistente.setCodigo(dto.getCodigoSolicitud());
         }
 
 
+        if (dto.getJefeOficina() != null) {
+            solicitudExistente.setJefeOficina(dto.getJefeOficina());
+        }
+        if (dto.getFichaCaracterizacion() != null) {
+            solicitudExistente.setFichaCaracterizacion(dto.getFichaCaracterizacion());
+        }
 
-}}
+
+    }
+}

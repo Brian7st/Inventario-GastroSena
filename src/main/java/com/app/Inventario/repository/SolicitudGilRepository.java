@@ -15,7 +15,7 @@ public interface SolicitudGilRepository extends JpaRepository<SolicitudGil, Long
 
     List<SolicitudGil>findByCodigoRegional(Integer codigoRegional);
 
-    List<SolicitudGil>finByFechaBetween(LocalDate inicio, LocalDate fin);
+    List<SolicitudGil>findByFechaBetween(LocalDate inicio, LocalDate fin);
 
     List<SolicitudGil> findByIdInAndFacturaGlobalIsNotNull(List<Long> ids);
     

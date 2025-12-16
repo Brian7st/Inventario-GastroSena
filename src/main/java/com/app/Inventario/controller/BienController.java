@@ -1,8 +1,8 @@
 package com.app.Inventario.controller;
 
 
-import com.app.Inventario.model.dto.BienRequestDTO;
-import com.app.Inventario.model.dto.BienResponseDTO;
+import com.app.Inventario.model.dto.request.BienRequestDTO;
+import com.app.Inventario.model.dto.response.BienResponseDTO;
 import com.app.Inventario.service.BienService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

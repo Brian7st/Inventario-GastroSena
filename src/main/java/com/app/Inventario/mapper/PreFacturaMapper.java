@@ -1,10 +1,12 @@
 package com.app.Inventario.mapper;
 
-import com.app.Inventario.model.dto.PreFacturaRequestDTO;
-import com.app.Inventario.model.dto.PreFacturaResponseDTO;
+import com.app.Inventario.model.dto.request.PreFacturaRequestDTO;
+import com.app.Inventario.model.dto.response.PreFacturaResponseDTO;
 import com.app.Inventario.model.entity.PreFactura;
 import com.app.Inventario.model.entity.ProgramaFormacion;
+import org.springframework.stereotype.Component;
 
+@Component
 public class PreFacturaMapper {
 
 

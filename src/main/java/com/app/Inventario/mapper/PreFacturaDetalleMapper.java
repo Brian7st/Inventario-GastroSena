@@ -1,7 +1,7 @@
 package com.app.Inventario.mapper;
 
-import com.app.Inventario.model.dto.PreFacturaDetalleRequestDTO;
-import com.app.Inventario.model.dto.PreFacturaDetalleResponseDTO;
+import com.app.Inventario.model.dto.request.PreFacturaDetalleRequestDTO;
+import com.app.Inventario.model.dto.response.PreFacturaDetalleResponseDTO;
 import com.app.Inventario.model.entity.Bien;
 import com.app.Inventario.model.entity.PreFactura;
 import com.app.Inventario.model.entity.PreFacturaDetalle;

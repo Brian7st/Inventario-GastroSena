@@ -2,8 +2,8 @@ package com.app.Inventario.service;
 
 
 import com.app.Inventario.mapper.BienMapper;
-import com.app.Inventario.model.dto.BienRequestDTO;
-import com.app.Inventario.model.dto.BienResponseDTO;
+import com.app.Inventario.model.dto.request.BienRequestDTO;
+import com.app.Inventario.model.dto.response.BienResponseDTO;
 import com.app.Inventario.model.entity.Bien;
 import com.app.Inventario.model.entityMaestras.Categoria;
 import com.app.Inventario.model.entityMaestras.Impuesto;

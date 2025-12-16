@@ -4,5 +4,8 @@ public enum EstadoSolicitud {
     PENDIENTE,
     VALIDADA,
     FACTURADA,
-    APROBADA
+    APROBADA,
+    RECHAZADA,
+    CANCELADA,
+    PROCESADA
 }

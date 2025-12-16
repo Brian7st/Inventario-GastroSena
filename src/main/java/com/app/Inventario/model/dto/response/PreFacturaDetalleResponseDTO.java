@@ -1,4 +1,4 @@
-package com.app.Inventario.model.dto;
+package com.app.Inventario.model.dto.response;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;

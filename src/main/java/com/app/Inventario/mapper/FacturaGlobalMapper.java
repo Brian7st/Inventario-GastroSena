@@ -1,7 +1,7 @@
 package com.app.Inventario.mapper;
 
-import com.app.Inventario.model.dto.ConsolidacionItemResponseDTO;
-import com.app.Inventario.model.dto.FacturaGlobalResponseDTO;
+import com.app.Inventario.model.dto.response.ConsolidacionItemResponseDTO;
+import com.app.Inventario.model.dto.response.FacturaGlobalResponseDTO;
 import com.app.Inventario.model.entity.FacturaGlobal;
 import com.app.Inventario.model.entity.SolicitudGil;
 import org.springframework.stereotype.Component;

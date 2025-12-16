@@ -1,10 +1,10 @@
 package com.app.Inventario.service;
 
 import com.app.Inventario.mapper.ConciliacionMapper;
-import com.app.Inventario.model.dto.ConciliacionDetalleResponseDTO;
-import com.app.Inventario.model.dto.ConciliacionRequestDTO;
-import com.app.Inventario.model.dto.ConciliacionResponseDTO;
-import com.app.Inventario.model.dto.ConteoFisicoRequestDTO;
+import com.app.Inventario.model.dto.response.ConciliacionDetalleResponseDTO;
+import com.app.Inventario.model.dto.request.ConciliacionRequestDTO;
+import com.app.Inventario.model.dto.response.ConciliacionResponseDTO;
+import com.app.Inventario.model.dto.request.ConteoFisicoRequestDTO;
 import com.app.Inventario.model.entity.Bien;
 import com.app.Inventario.model.entity.Conciliacion;
 import com.app.Inventario.model.entity.ConciliacionDetalle;

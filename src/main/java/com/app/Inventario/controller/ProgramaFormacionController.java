@@ -1,7 +1,7 @@
 package com.app.Inventario.controller;
 
-import com.app.Inventario.model.dto.ProgramaRequestDTO;
-import com.app.Inventario.model.dto.ProgramaResponseDTO;
+import com.app.Inventario.model.dto.request.ProgramaRequestDTO;
+import com.app.Inventario.model.dto.response.ProgramaResponseDTO;
 import com.app.Inventario.service.ProgramaService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
