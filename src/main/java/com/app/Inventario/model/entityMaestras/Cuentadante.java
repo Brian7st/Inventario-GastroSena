@@ -26,5 +26,5 @@ public class Cuentadante {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "solicitud_gil_id", nullable = false)
-    private SolicitudGil SolicitudGil;
+    private SolicitudGil solicitudGil;
 }

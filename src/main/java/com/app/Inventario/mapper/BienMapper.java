@@ -1,7 +1,7 @@
 package com.app.Inventario.mapper;
 
-import com.app.Inventario.model.dto.BienRequestDTO;
-import com.app.Inventario.model.dto.BienResponseDTO;
+import com.app.Inventario.model.dto.request.BienRequestDTO;
+import com.app.Inventario.model.dto.response.BienResponseDTO;
 import com.app.Inventario.model.entity.Bien;
 import com.app.Inventario.model.entityMaestras.Categoria;
 import com.app.Inventario.model.entityMaestras.Impuesto;
@@ -83,8 +83,8 @@ public class BienMapper {
                 .valorUnitario(dto.getValorUnitario())
                 .stockMinimo(dto.getStockMinimo())
 
-
-                .estado(dto.getEstado()!= null ? dto.getEstado() : EstadoBien.DISPONIBLE)
+                .stockActual(BigDecimal.ZERO)
+                .estado(dto.getEstado()!= null ? dto.getEstado() : EstadoBien.SIN_STOCK)
                 .activo(dto.getActivo() != null ? dto.getActivo() : true)
                 .build();
     }

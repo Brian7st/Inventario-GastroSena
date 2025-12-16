@@ -4,21 +4,44 @@ services:
   mysqldb:
     image: mysql:8.0
     container_name: mysqldb_container
+    # Reiniciar siempre es útil para la base de datos
+    restart: always
     ports:
-      - "3306:3306"
+      - "3306:3306" # Mapea el puerto local al puerto del contenedor
     environment:
+      # Credenciales y nombre de la BD para MySQL
       MYSQL_DATABASE: inventario_db
       MYSQL_ROOT_PASSWORD: root
-    # YA NO NECESITAMOS VOLUMES DE INIT.SQL
-    # La base de datos nace vacía y Java la llenará.
+    # Opcional: Persistir datos de la BD en tu máquina local
+    volumes:
+      - db_data:/var/lib/mysql
+    networks:
+      - spring-network
 
   backend-app:
+    # Usa el Dockerfile en el directorio actual para construir la imagen
     build: .
+    container_name: backend_app_container
     ports:
-      - "8080:8080"
+      - "8080:8080" # Mapea el puerto local al puerto del contenedor
+    # Asegura que la base de datos esté lista antes de intentar iniciar la app
     depends_on:
       - mysqldb
     environment:
+      # URL de Conexión: el 'host' es el nombre del servicio 'mysqldb'
       SPRING_DATASOURCE_URL: jdbc:mysql://mysqldb:3306/inventario_db?allowPublicKeyRetrieval=true&useSSL=false
       SPRING_DATASOURCE_USERNAME: root
       SPRING_DATASOURCE_PASSWORD: root
+    networks:
+      - spring-network
+    # Reiniciar si falla
+    restart: on-failure
+
+# Volúmenes para persistencia de datos (mantener la BD aunque se detengan los contenedores)
+volumes:
+  db_data:
+
+# Red para que los contenedores se comuniquen entre sí usando los nombres de servicio.
+networks:
+  spring-network:
+    driver: bridge

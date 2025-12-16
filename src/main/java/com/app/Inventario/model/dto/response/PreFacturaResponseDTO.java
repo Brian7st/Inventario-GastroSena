@@ -1,14 +1,18 @@
-    package com.app.Inventario.model.dto;
+    package com.app.Inventario.model.dto.response;
 
 
     import com.app.Inventario.model.entity.ProgramaFormacion;
     import com.app.Inventario.model.enums.EstadoPreFactura;
+    import lombok.AllArgsConstructor;
     import lombok.Data;
+    import lombok.NoArgsConstructor;
 
     import java.math.BigDecimal;
     import java.time.LocalDateTime;
 
     @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
 
     public class PreFacturaResponseDTO {
         private Long id;

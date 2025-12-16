@@ -30,7 +30,7 @@ public class ProgramaFormacion {
     @Column(columnDefinition = "ENUM('ACTIVO', 'INACTIVO')")
     private EstadoPrograma estadoPrograma;
 
-    @OneToMany(mappedBy = "programa", fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "programaFormacion", fetch = FetchType.LAZY)
     private List<PreFactura> preFacturas;
 
 }

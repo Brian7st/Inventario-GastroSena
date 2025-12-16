@@ -1,10 +1,12 @@
 package com.app.Inventario.model.entity;
 
+import com.app.Inventario.model.entityMaestras.Cuentadante;
 import com.app.Inventario.model.enums.DestinoBienes;
 import com.app.Inventario.model.enums.EstadoSolicitud;
 import com.app.Inventario.model.enums.TipoCuentadante;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
@@ -18,8 +20,8 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class
-SolicitudGil {
+@Builder
+public class SolicitudGil {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,14 +34,17 @@ SolicitudGil {
     @Column(nullable = false)
     private LocalDate fecha;
 
-    @Column(name = "codigo_regional",nullable = false)
-    private Integer codigoRegional = 63;
+    @Column(name = "codigo_regional",nullable = false, length = 5)
+    private String codigoRegional = "63";
 
     @Column(name = "nombre_regional", length = 50, nullable = false)
-    private String nombreRegional = "Quindio";
+    private String nombreRegional = "Quindío";
 
     @Column(name = "codigo_centro_costos", length = 20, nullable = false)
     private String codigoCentroCostos = "953810";
+
+    @Column(name = "nombre_centro_costos", length = 100, nullable = false)
+    private String nombreCentroCostos = "Comercio y Turismo";
 
     @Column(name = "jefe_oficina", length = 150)
     private String jefeOficina;

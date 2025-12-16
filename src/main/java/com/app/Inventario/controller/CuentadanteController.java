@@ -1,6 +1,7 @@
 package com.app.Inventario.controller;
 
-import com.app.Inventario.model.entity.Cuentadante;
+
+import com.app.Inventario.model.entityMaestras.Cuentadante;
 import com.app.Inventario.service.CuentadanteService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;

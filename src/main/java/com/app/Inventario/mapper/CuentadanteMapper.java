@@ -1,7 +1,7 @@
 package com.app.Inventario.mapper;
 
 import com.app.Inventario.model.dto.CuentadanteDTO;
-import com.app.Inventario.model.entity.Cuentadante;
+import com.app.Inventario.model.entityMaestras.Cuentadante;
 import org.springframework.stereotype.Component;
 
 import java.util.List;

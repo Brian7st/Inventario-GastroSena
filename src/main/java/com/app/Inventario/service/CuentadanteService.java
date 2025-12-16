@@ -1,7 +1,8 @@
 package com.app.Inventario.service;
 
-import com.app.Inventario.model.entity.Cuentadante;
+
 import com.app.Inventario.model.entity.SolicitudGil;
+import com.app.Inventario.model.entityMaestras.Cuentadante;
 import com.app.Inventario.model.enums.EstadoSolicitud;
 import com.app.Inventario.repository.CuentadanteRepository;
 import com.app.Inventario.repository.SolicitudGilRepository;
@@ -73,5 +74,5 @@ public class CuentadanteService {
     }
 
     public List<Cuentadante> listarPorSolicitud(Long solicitudId) {
-        return cuentadanteRepository.findBySolicitudId(solicitudId);
+        return cuentadanteRepository.findBySolicitudGilId(solicitudId);
 }}

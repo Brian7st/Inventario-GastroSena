@@ -1,12 +1,12 @@
 package com.app.Inventario.service;
 
 import com.app.Inventario.mapper.FacturaGlobalMapper;
-import com.app.Inventario.model.dto.ConsolidacionItemResponseDTO;
-import com.app.Inventario.model.dto.FacturaGlobalRequestDTO;
-import com.app.Inventario.model.dto.FacturaGlobalResponseDTO;
+import com.app.Inventario.model.dto.response.ConsolidacionItemResponseDTO;
+import com.app.Inventario.model.dto.request.FacturaGlobalRequestDTO;
+import com.app.Inventario.model.dto.response.FacturaGlobalResponseDTO;
 import com.app.Inventario.model.entity.*;
 import com.app.Inventario.model.enums.EstadoFacturaGlobal;
-import com.app.Inventario.model.enums.EstadoSolicitud; 
+import com.app.Inventario.model.enums.EstadoSolicitud;
 import com.app.Inventario.repository.FacturaGlobalRepository;
 import com.app.Inventario.repository.SolicitudGilRepository;
 import com.app.Inventario.repository.SolicitudItemsRepository;
@@ -48,7 +48,7 @@ public class FacturaGlobalService {
         FacturaGlobal nuevaFactura = calcularTotales(itemsConsolidadosDTO);
         nuevaFactura.setNumeroConsecutivo(generarSiguienteNumeroFactura());
         nuevaFactura.setFechaGeneracion(LocalDateTime.now());
-        nuevaFactura.setEstado(EstadoFacturaGlobal.GENERADA); //
+        nuevaFactura.setEstado(EstadoFacturaGlobal.GENERADA);
 
         List<FacturaGlobalDetalle> detalles = itemsConsolidadosDTO.stream()
                 .map(dto -> mapToDetalleEntity(dto, nuevaFactura))
@@ -92,7 +92,7 @@ public class FacturaGlobalService {
 
     private List<SolicitudGil> obtenerSolicitudesValidas(List<Long> gilF014Ids) {
         List<SolicitudGil> solicitudes = solicitudGilRepository.findByIdInAndEstadoAndFacturaGlobalIsNull(
-                gilF014Ids, EstadoSolicitud.VALIDADA); 
+                gilF014Ids, EstadoSolicitud.VALIDADA);
 
         if (solicitudes.size() != gilF014Ids.size()) {
             throw new RuntimeException("Error: No todas las solicitudes seleccionadas existen o están en estado 'VALIDADA'.");
@@ -111,7 +111,7 @@ public class FacturaGlobalService {
                         Collectors.reducing(
                                 null,
                                 this::mapToConsolidacionItem,
-                                this::combineConsolidacionItems 
+                                this::combineConsolidacionItems
                         )
                 ))
                 .values().stream()
@@ -119,23 +119,34 @@ public class FacturaGlobalService {
                 .collect(Collectors.toList());
     }
 
-   
+    // --- CORRECCIÓN PRINCIPAL AQUÍ ---
     private ConsolidacionItemResponseDTO mapToConsolidacionItem(SolicitudItems item) {
         Bien bien = item.getBien();
 
+        // 1. Obtener porcentaje desde la entidad Impuesto de forma segura
+        BigDecimal porcentajeIva = BigDecimal.ZERO;
+
+        // Asumimos que la entidad Bien tiene el método getImpuesto()
+        if (bien.getImpuesto() != null && bien.getImpuesto().getPorcentaje() != null) {
+            porcentajeIva = bien.getImpuesto().getPorcentaje();
+        }
+
+        // 2. Cálculos matemáticos
         BigDecimal totalSinIva = bien.getValorUnitario()
                 .multiply(item.getCantidad())
                 .setScale(SCALE, ROUNDING_MODE);
 
         BigDecimal ivaAmount = totalSinIva
-                .multiply(bien.getPorcentajeIva())
+                .multiply(porcentajeIva)
                 .divide(new BigDecimal("100"), SCALE, ROUNDING_MODE);
 
+        // 3. Construir DTO
         return ConsolidacionItemResponseDTO.builder()
                 .codigoProducto(bien.getCodigo())
                 .descripcion(bien.getNombre())
                 .valorUnitarioAntesIva(bien.getValorUnitario().setScale(SCALE, ROUNDING_MODE))
-                .ivaPorcentaje(bien.getPorcentajeIva().setScale(SCALE, ROUNDING_MODE))
+                // Usamos la variable local calculada 'porcentajeIva'
+                .ivaPorcentaje(porcentajeIva.setScale(SCALE, ROUNDING_MODE))
                 .cantidad(item.getCantidad().setScale(SCALE, ROUNDING_MODE))
                 .totalSinIva(totalSinIva)
                 .valorIva(ivaAmount)

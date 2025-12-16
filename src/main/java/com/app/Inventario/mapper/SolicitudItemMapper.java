@@ -1,6 +1,6 @@
 package com.app.Inventario.mapper;
 
-import com.app.Inventario.model.dto.SolicitudItemResponseDTO;
+import com.app.Inventario.model.dto.response.SolicitudItemResponseDTO;
 import com.app.Inventario.model.entity.SolicitudItems;
 import org.springframework.stereotype.Component;
 
