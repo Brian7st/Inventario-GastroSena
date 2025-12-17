@@ -31,7 +31,6 @@ public class BienService {
     private final ImpuestoRepository impuestoRepository;
 
     private final BienMapper bienMapper;
-    private final EntityManager entityManager;
 
     @Transactional
     public BienResponseDTO crearBien(BienRequestDTO request) {

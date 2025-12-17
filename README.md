@@ -9,4 +9,4 @@
 **Paso 1: Encender la Base de Datos**
 No necesitas instalar MySQL. Solo corre este comando en la raíz del proyecto:
 ```bash
-docker-compose up -d mysqldb
+docker-compose up
