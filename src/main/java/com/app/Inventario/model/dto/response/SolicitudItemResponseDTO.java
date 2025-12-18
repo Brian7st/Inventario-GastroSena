@@ -11,10 +11,12 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @NoArgsConstructor
 public class SolicitudItemResponseDTO {
-
+    private Long id;
     private BigDecimal cantidad;
 
-    private BienResponseDTO bien;
+    private Long bienId;
+    private String bienNombre;
+    private String bienCodigo;
 
 
 }

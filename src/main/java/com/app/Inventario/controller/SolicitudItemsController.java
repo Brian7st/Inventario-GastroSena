@@ -1,11 +1,10 @@
 package com.app.Inventario.controller;
 
-import com.app.Inventario.model.entity.SolicitudItems;
+import com.app.Inventario.model.dto.response.SolicitudItemResponseDTO;
+import com.app.Inventario.mapper.SolicitudItemMapper;
 import com.app.Inventario.service.SolicitudItemsService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -18,69 +17,43 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/solicitudes-gil/items")
 @RequiredArgsConstructor
-@Tag(name = "Items de Solicitud GIL", description = "Operaciones para gestionar los bienes (items) dentro de una solicitud GIL específica.")
+@Tag(name = "Items de Solicitud GIL", description = "Endpoints para la consulta y eliminación de bienes asociados a una solicitud.")
 public class SolicitudItemsController {
 
     private final SolicitudItemsService solicitudItemsService;
+    private final SolicitudItemMapper solicitudItemMapper;
 
-    @Operation(summary = "Agregar un item a una solicitud", description = "Asocia un nuevo item (bien y cantidad) a una solicitud existente identificada por su ID.")
+    @Operation(
+            summary = "Listar ítems de una solicitud",
+            description = "Obtiene todos los bienes y sus cantidades asociados a una solicitud GIL específica."
+    )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Item agregado exitosamente",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = SolicitudItems.class))),
-            @ApiResponse(responseCode = "404", description = "Solicitud no encontrada", content = @Content),
-            @ApiResponse(responseCode = "400", description = "Datos del item inválidos o solicitud en estado no editable", content = @Content)
+            @ApiResponse(responseCode = "200", description = "Lista de ítems recuperada con éxito"),
+            @ApiResponse(responseCode = "404", description = "La solicitud no existe")
     })
-    @PostMapping("/{solicitudId}")
-    public ResponseEntity<SolicitudItems> agregarItem(
-            @Parameter(description = "ID de la solicitud GIL a la cual se agregará el item", required = true, example = "1")
-            @PathVariable Long solicitudId,
-            @RequestBody SolicitudItems item) {
+    @GetMapping("/solicitud/{solicitudId}")
+    public ResponseEntity<List<SolicitudItemResponseDTO>> listarItemsPorSolicitud(
+            @Parameter(description = "ID de la solicitud GIL", required = true)
+            @PathVariable Long solicitudId) {
         return ResponseEntity.ok(
-                solicitudItemsService.agregarItems(solicitudId, item)
+                solicitudItemMapper.toResponseDtos(solicitudItemsService.listarItems(solicitudId))
         );
     }
 
-    @Operation(summary = "Actualizar un item existente", description = "Modifica la cantidad o el bien asociado de un item específico.")
+    @Operation(
+            summary = "Eliminar un ítem de la solicitud",
+            description = "Elimina un ítem específico. Solo es posible si la solicitud está en estado PENDIENTE."
+    )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Item actualizado correctamente",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = SolicitudItems.class))),
-            @ApiResponse(responseCode = "404", description = "Item no encontrado", content = @Content)
-    })
-    @PutMapping("/{itemId}")
-    public ResponseEntity<SolicitudItems> actualizarItem(
-            @Parameter(description = "ID del item que se desea actualizar", required = true, example = "5")
-            @PathVariable Long itemId,
-            @RequestBody SolicitudItems item) {
-        return ResponseEntity.ok(
-                solicitudItemsService.actualizarItems(itemId, item)
-        );
-    }
-
-    @Operation(summary = "Eliminar un item", description = "Elimina un item de una solicitud. Solo permitido si la solicitud está en estado PENDIENTE.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Item eliminado correctamente (sin contenido)", content = @Content),
-            @ApiResponse(responseCode = "404", description = "Item no encontrado", content = @Content)
+            @ApiResponse(responseCode = "204", description = "Ítem eliminado exitosamente"),
+            @ApiResponse(responseCode = "400", description = "No se puede eliminar porque la solicitud ya está aprobada o facturada"),
+            @ApiResponse(responseCode = "404", description = "Ítem no encontrado")
     })
     @DeleteMapping("/{itemId}")
     public ResponseEntity<Void> eliminarItem(
-            @Parameter(description = "ID del item a eliminar", required = true, example = "5")
+            @Parameter(description = "ID del ítem a eliminar", required = true)
             @PathVariable Long itemId) {
         solicitudItemsService.eliminarItem(itemId);
         return ResponseEntity.noContent().build();
-    }
-
-    @Operation(summary = "Listar items de una solicitud", description = "Obtiene la lista de todos los items asociados a una solicitud específica.")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Lista recuperada exitosamente",
-                    content = @Content(mediaType = "application/json", schema = @Schema(implementation = SolicitudItems.class))),
-            @ApiResponse(responseCode = "404", description = "Solicitud no encontrada", content = @Content)
-    })
-    @GetMapping("/solicitud/{solicitudId}")
-    public ResponseEntity<List<SolicitudItems>> listarItemsPorSolicitud(
-            @Parameter(description = "ID de la solicitud para consultar sus items", required = true, example = "1")
-            @PathVariable Long solicitudId) {
-        return ResponseEntity.ok(
-                solicitudItemsService.listarItems(solicitudId)
-        );
     }
 }

@@ -1,4 +1,3 @@
-
 package com.app.Inventario.service;
 
 import com.app.Inventario.mapper.PreFacturaDetalleMapper;
@@ -33,164 +32,124 @@ public class PreFacturaService {
     private final PreFacturaDetalleRepository preFacturaDetalleRepository;
     private final ProgramaFormacionRepository programaFormacionRepository;
     private final BienRepository bienRepository;
-
     private final PreFacturaMapper preFacturaMapper;
     private final PreFacturaDetalleMapper preFacturaDetalleMapper;
 
-
     @Transactional
     public PreFacturaResponseDTO crearPreFactura(PreFacturaRequestDTO request) {
-
         if (preFacturaRepository.existsByNumero(request.getNumero())) {
             throw new RuntimeException("Ya existe una PreFactura con el número: " + request.getNumero());
         }
 
         ProgramaFormacion programa = programaFormacionRepository.findById(request.getProgramaId())
-                .orElseThrow(() -> new RuntimeException("Programa de Formación no encontrado con ID: " + request.getProgramaId()));
+                .orElseThrow(() -> new RuntimeException("Programa no encontrado ID: " + request.getProgramaId()));
 
         PreFactura nuevaPreFactura = preFacturaMapper.toEntity(request, programa);
         nuevaPreFactura.setFecha(LocalDateTime.now());
         nuevaPreFactura.setEstado(EstadoPreFactura.PENDIENTE);
         nuevaPreFactura.setDetalles(new ArrayList<>());
 
-        PreFactura preFacturaGuardada = preFacturaRepository.save(nuevaPreFactura);
+        BigDecimal totalGeneral = procesarDetalles(request.getDetalles(), nuevaPreFactura);
+        nuevaPreFactura.setTotalPrefactura(totalGeneral);
 
-        BigDecimal totalGeneralCalculado = procesarDetalles(request.getDetalles(), preFacturaGuardada);
-
-        preFacturaGuardada.setTotalPrefactura(totalGeneralCalculado);
-        preFacturaRepository.save(preFacturaGuardada);
-
-        return preFacturaMapper.toResponseDtoPreFactura(preFacturaGuardada);
+        PreFactura guardada = preFacturaRepository.save(nuevaPreFactura);
+        return mapToResponse(guardada);
     }
 
-
     @Transactional(readOnly = true)
-    public List<PreFacturaResponseDTO> listarTodos(){
-        return preFacturaRepository
-                .findAll().stream()
-                .map(preFacturaMapper::toResponseDtoPreFactura)
+    public List<PreFacturaResponseDTO> listarTodos() {
+        return preFacturaRepository.findAll().stream()
+                .map(this::mapToResponse)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public PreFacturaResponseDTO obtenerPorId(long id){
-        PreFactura preFactura = preFacturaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("PreFactura no encontrada con ID: " + id));
-
-        return preFacturaMapper.toResponseDtoPreFactura(preFactura);
+    public PreFacturaResponseDTO obtenerPorId(long id) {
+        PreFactura pf = preFacturaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("PreFactura no encontrada ID: " + id));
+        return mapToResponse(pf);
     }
 
-
     @Transactional
-    public PreFacturaResponseDTO actualizarPreFactura (long id, PreFacturaRequestDTO request){
-        PreFactura preFacturaExistente = preFacturaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("No se puede actualizar, PreFactura no encontrada por ID: " + id));
+    public PreFacturaResponseDTO actualizarPreFactura(long id, PreFacturaRequestDTO request) {
+        PreFactura existente = preFacturaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("ID no encontrado: " + id));
 
-
-        if (preFacturaExistente.getEstado() != EstadoPreFactura.PENDIENTE) {
-            throw new RuntimeException("Solo se pueden modificar PreFacturas en estado PENDIENTE. Estado actual: " + preFacturaExistente.getEstado());
+        if (existente.getEstado() != EstadoPreFactura.PENDIENTE) {
+            throw new RuntimeException("Solo se pueden modificar en estado PENDIENTE.");
         }
 
-
-        if(!preFacturaExistente.getNumero().equals(request.getNumero()) && preFacturaRepository.existsByNumero(request.getNumero())){
-            throw new RuntimeException("El número de PreFactura " + request.getNumero() + " ya está en uso por otra prefactura.");
-        }
-
-
-        preFacturaDetalleRepository.deleteAll(preFacturaExistente.getDetalles());
-        preFacturaExistente.getDetalles().clear();
-
+        preFacturaDetalleRepository.deleteAll(existente.getDetalles());
+        existente.getDetalles().clear();
 
         ProgramaFormacion programa = programaFormacionRepository.findById(request.getProgramaId())
-                .orElseThrow(() -> new RuntimeException("Programa de Formación no encontrado con ID: " + request.getProgramaId()));
+                .orElseThrow(() -> new RuntimeException("Programa no encontrado"));
 
-        preFacturaMapper.updateEntityFromDTO(preFacturaExistente, request, programa);
+        preFacturaMapper.updateEntityFromDTO(existente, request, programa);
 
+        BigDecimal nuevoTotal = procesarDetalles(request.getDetalles(), existente);
+        existente.setTotalPrefactura(nuevoTotal);
 
-
-        BigDecimal nuevoTotal = procesarDetalles(request.getDetalles(), preFacturaExistente);
-
-        preFacturaExistente.setTotalPrefactura(nuevoTotal);
-
-        PreFactura preFacturaActualizada = preFacturaRepository.save(preFacturaExistente);
-        return  preFacturaMapper.toResponseDtoPreFactura(preFacturaActualizada);
+        return mapToResponse(preFacturaRepository.save(existente));
     }
-
 
     @Transactional
-    public void anularPreFactura(long id){
-        PreFactura preFactura = preFacturaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("PreFactura no encontrada ID " + id));
-
-        if (preFactura.getEstado() == EstadoPreFactura.ANULADA) {
-            throw new RuntimeException("La PreFactura ID " + id + " ya se encuentra ANULADA.");
-        }
-
-
-        preFactura.setEstado(EstadoPreFactura.ANULADA);
-
-        preFacturaRepository.save(preFactura);
+    public void anularPreFactura(long id) {
+        PreFactura pf = preFacturaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("No encontrada"));
+        pf.setEstado(EstadoPreFactura.ANULADA);
+        preFacturaRepository.save(pf);
     }
-
 
     @Transactional
     public PreFacturaResponseDTO validarPreFactura(long id) {
-        PreFactura preFactura = preFacturaRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("PreFactura no encontrada ID " + id));
+        PreFactura pf = preFacturaRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("No encontrada"));
 
-        if (preFactura.getEstado() == EstadoPreFactura.ANULADA) {
-            throw new RuntimeException("No se puede validar una PreFactura ANULADA.");
+        if (pf.getEstado() == EstadoPreFactura.PENDIENTE) {
+            pf.setEstado(EstadoPreFactura.VALIDADA);
+            pf = preFacturaRepository.save(pf);
         }
-
-        if (preFactura.getEstado() == EstadoPreFactura.VALIDADA) {
-            return preFacturaMapper.toResponseDtoPreFactura(preFactura);
-        }
-
-        preFactura.setEstado(EstadoPreFactura.VALIDADA);
-        PreFactura preFacturaValidada = preFacturaRepository.save(preFactura);
-
-        return preFacturaMapper.toResponseDtoPreFactura(preFacturaValidada);
+        return mapToResponse(pf);
     }
-
-
 
     private BigDecimal procesarDetalles(List<PreFacturaDetalleRequestDTO> detallesRequest, PreFactura preFactura) {
-        BigDecimal totalGeneralCalculado = BigDecimal.ZERO;
+        BigDecimal total = BigDecimal.ZERO;
+        for (PreFacturaDetalleRequestDTO dr : detallesRequest) {
+            Bien bien = bienRepository.findById(dr.getBienId())
+                    .orElseThrow(() -> new RuntimeException("Bien ID " + dr.getBienId() + " no existe"));
 
-        for (PreFacturaDetalleRequestDTO detalleRequest : detallesRequest) {
-
-            Bien bien = bienRepository.findById(detalleRequest.getBienId())
-                    .orElseThrow(() -> new RuntimeException("Bien no encontrado con ID: " + detalleRequest.getBienId() + " en el detalle."));
-
-
-            PreFacturaDetalle detalleEntity = preFacturaDetalleMapper.toEntity(
-                    detalleRequest,
-                    bien,
-                    preFactura
-            );
-
-
-            BigDecimal totalLinea = detalleRequest.getCantidad().multiply(detalleRequest.getPrecioAdjudicado());
-            totalGeneralCalculado = totalGeneralCalculado.add(totalLinea);
-
-            preFactura.getDetalles().add(detalleEntity);
+            PreFacturaDetalle detalle = preFacturaDetalleMapper.toEntity(dr, bien, preFactura);
+            BigDecimal totalLinea = dr.getCantidad().multiply(dr.getPrecioAdjudicado());
+            total = total.add(totalLinea);
+            preFactura.getDetalles().add(detalle);
         }
-        return totalGeneralCalculado;
+        return total;
     }
 
+    private PreFacturaResponseDTO mapToResponse(PreFactura pf) {
+        if (pf.getProgramaFormacion() != null) pf.getProgramaFormacion().getId();
+        if (pf.getDetalles() != null) pf.getDetalles().size();
 
+        PreFacturaResponseDTO response = preFacturaMapper.toResponseDtoPreFactura(pf);
+
+        if (pf.getDetalles() != null) {
+            response.setDetalles(pf.getDetalles().stream()
+                    .map(preFacturaDetalleMapper::toResponseDto)
+                    .collect(Collectors.toList()));
+        }
+
+        return response;
+    }
+
+    @Transactional(readOnly = true)
+    public List<PreFacturaResponseDTO> listarConFiltros(String numero, String estado, Long programaId){
+        return preFacturaRepository.findAll().stream()
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
+    }
     public PreFactura obtenerEntidadPorId(Long id) {
         return preFacturaRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("PreFactura no encontrada con id: " + id));
-    }
-    @Transactional(readOnly = true)
-    public List<PreFacturaResponseDTO> listarConFiltros(String numero, String estado, Long programaId){
-
-        List<PreFactura> preFacturas = preFacturaRepository.findAll();
-
-
-        return preFacturas.stream()
-                .map(preFacturaMapper::toResponseDtoPreFactura)
-                .collect(Collectors.toList());
     }
 }

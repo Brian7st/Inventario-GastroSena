@@ -31,7 +31,7 @@ public class SolicitudGilResponseDTO {
     private String fichaCaracterizacion;
 
     private Long preFacturaId;
-    private Long facturaGlobalId;
+
 
     private EstadoSolicitud estado;
 

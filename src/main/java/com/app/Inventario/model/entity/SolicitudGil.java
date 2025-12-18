@@ -34,15 +34,19 @@ public class SolicitudGil {
     @Column(nullable = false)
     private LocalDate fecha;
 
+    @Builder.Default
     @Column(name = "codigo_regional",nullable = false, length = 5)
     private String codigoRegional = "63";
 
+    @Builder.Default
     @Column(name = "nombre_regional", length = 50, nullable = false)
     private String nombreRegional = "Quindío";
 
+    @Builder.Default
     @Column(name = "codigo_centro_costos", length = 20, nullable = false)
     private String codigoCentroCostos = "953810";
 
+    @Builder.Default
     @Column(name = "nombre_centro_costos", length = 100, nullable = false)
     private String nombreCentroCostos = "Comercio y Turismo";
 
@@ -55,6 +59,7 @@ public class SolicitudGil {
 
 
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     @Column(columnDefinition = " ENUM('Formación', 'Administrativo') DEFAULT 'Formación'")
     private DestinoBienes destinoBienes = DestinoBienes.FORMACION;
 

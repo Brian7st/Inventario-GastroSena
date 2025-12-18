@@ -1,7 +1,6 @@
 package com.app.Inventario.model.dto.request;
 
 import com.app.Inventario.model.dto.CuentadanteDTO;
-import com.app.Inventario.model.dto.response.SolicitudItemRequestDTO;
 import com.app.Inventario.model.enums.DestinoBienes;
 import com.app.Inventario.model.enums.EstadoSolicitud;
 import com.app.Inventario.model.enums.TipoCuentadante;
@@ -47,7 +46,7 @@ public class SolicitudGilRequestDTO {
     @NotBlank
     private String fichaCaracterizacion;
 
-    @NotNull
+    @NotNull(message = "Debe Vincular una Prefactura")
     private Long preFacturaId;
 
     private Long facturaGlobalId;
@@ -57,12 +56,6 @@ public class SolicitudGilRequestDTO {
     @Valid
     @Size(min = 1)
     private List<CuentadanteDTO> cuentadantes;
-
-    @Valid
-    @Size(min = 1)
-    private List<SolicitudItemRequestDTO> items;
-
-
 
 
 }
