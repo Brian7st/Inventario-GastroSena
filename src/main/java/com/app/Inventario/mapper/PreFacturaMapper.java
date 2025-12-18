@@ -24,8 +24,12 @@ public class PreFacturaMapper {
         dto.setInstructorIdentificacion(preFactura.getIdentificacionInstructor());
         dto.setEstado(preFactura.getEstado());
         dto.setTotalGeneral(preFactura.getTotalPrefactura());
-        dto.setPrograma(preFactura.getProgramaFormacion());
 
+
+        if(preFactura.getProgramaFormacion() != null){
+            dto.setProgramaId(preFactura.getProgramaFormacion().getId());
+            dto.setProgramaNombre(preFactura.getProgramaFormacion().getNombre());
+        }
 
         return dto;
     }

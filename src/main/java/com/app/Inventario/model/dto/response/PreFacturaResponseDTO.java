@@ -9,6 +9,7 @@
 
     import java.math.BigDecimal;
     import java.time.LocalDateTime;
+    import java.util.List;
 
     @Data
     @AllArgsConstructor
@@ -26,5 +27,8 @@
         private BigDecimal totalGeneral;
 
 
-        private ProgramaFormacion programa;
+        private Long programaId;
+        private String programaNombre;
+
+        private List<PreFacturaDetalleResponseDTO> detalles;
     }

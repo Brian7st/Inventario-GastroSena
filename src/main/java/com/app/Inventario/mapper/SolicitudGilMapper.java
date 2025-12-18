@@ -3,6 +3,7 @@ package com.app.Inventario.mapper;
 import com.app.Inventario.model.dto.request.SolicitudGilRequestDTO;
 import com.app.Inventario.model.dto.response.SolicitudGilResponseDTO;
 import com.app.Inventario.model.entity.SolicitudGil;
+import com.app.Inventario.model.enums.EstadoSolicitud;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -38,7 +39,6 @@ public class SolicitudGilMapper {
         dto.setDestinoBienes(solicitudGil.getDestinoBienes());
         dto.setFichaCaracterizacion(solicitudGil.getFichaCaracterizacion());
         dto.setPreFacturaId(solicitudGil.getPreFactura() != null ? solicitudGil.getPreFactura().getId() : null);
-        dto.setFacturaGlobalId(solicitudGil.getFacturaGlobal() != null ? solicitudGil.getFacturaGlobal().getId() : null);
         dto.setEstado(solicitudGil.getEstado());
         dto.setCuentadantes(cuentadanteMapper.toResponseDtos(solicitudGil.getCuentadantes()));
         dto.setItems(solicitudItemMapper.toResponseDtos(solicitudGil.getItems()));
@@ -64,8 +64,12 @@ public class SolicitudGilMapper {
 
         return SolicitudGil.builder()
                 .codigo(dto.getCodigoSolicitud())
+                .fecha(dto.getFecha()) // Importante: persistir la fecha del DTO
                 .jefeOficina(dto.getJefeOficina())
                 .fichaCaracterizacion(dto.getFichaCaracterizacion())
+                .tipoCuentadante(dto.getTipoCuentadante())
+                .destinoBienes(dto.getDestinoBienes())
+                .estado(dto.getEstado() != null ? dto.getEstado() : EstadoSolicitud.PENDIENTE)
                 .build();
     }
 

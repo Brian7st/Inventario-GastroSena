@@ -2,6 +2,7 @@ package com.app.Inventario.model.entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 import java.math.BigDecimal;
 
@@ -20,6 +21,7 @@ public class SolicitudItems {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "solicitud_gil_id", nullable = false)
+    @ToString.Exclude
     private SolicitudGil solicitudGil;
 
 

@@ -27,16 +27,46 @@ public class SolicitudGilService {
     private final PreFacturaService preFacturaService;
 
     @Transactional
-    public SolicitudGilResponseDTO crearSolicitud(SolicitudGilRequestDTO dto){
+    public SolicitudGilResponseDTO crearSolicitud(SolicitudGilRequestDTO dto) {
+
+        PreFactura preFactura = preFacturaService.obtenerEntidadPorId(dto.getPreFacturaId());
+
+        if (preFactura.getEstado() != EstadoPreFactura.VALIDADA) {
+            throw new RuntimeException("La PreFactura [" + dto.getPreFacturaId() + "] debe estar VALIDADA para generar una solicitud.");
+        }
+
+
         SolicitudGil solicitudGil = solicitudGilMapper.toEntity(dto);
+        solicitudGil.setPreFactura(preFactura);
+        solicitudGil.setEstado(EstadoSolicitud.PENDIENTE);
+
 
         SolicitudGil saved = solicitudGilRepository.save(solicitudGil);
+
+
+        List<SolicitudItems> nuevosItems = preFactura.getDetalles().stream()
+                .map(detalle -> {
+                    SolicitudItems item = new SolicitudItems();
+                    item.setSolicitudGil(saved);
+                    item.setBien(detalle.getBien());
+                    item.setCantidad(detalle.getCantidad());
+                    return item;
+                })
+                .collect(Collectors.toList());
+
+
+        solicitudItemsRepository.saveAll(nuevosItems);
+
+
+        saved.setItems(nuevosItems);
+
         return solicitudGilMapper.toResponseDto(saved);
     }
 
     public SolicitudGilResponseDTO obtenerId(Long id){
         SolicitudGil solicitudGil = solicitudGilRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Solicitud no Encontrada Por id: " + id));
+        if (solicitudGil.getItems() != null) solicitudGil.getItems().size();
         return solicitudGilMapper.toResponseDto(solicitudGil);
     }
 
@@ -56,8 +86,12 @@ public class SolicitudGilService {
         );
     }
 
-    public List<SolicitudGilResponseDTO> obtenerSolicitudes (){
+    @Transactional(readOnly = true)
+    public List<SolicitudGilResponseDTO> obtenerSolicitudes() {
         List<SolicitudGil> solicitudes = solicitudGilRepository.findAll();
+        solicitudes.forEach(s -> {
+            if (s.getItems() != null) s.getItems().size();
+        });
         return solicitudGilMapper.toResponseDtos(solicitudes);
     }
 
@@ -73,42 +107,6 @@ public class SolicitudGilService {
         solicitudGilRepository.delete(solicitud);
     }
 
-    @Transactional
-    public SolicitudGilResponseDTO asociarPreFactura (Long solicitudId, Long preFacturaId){
-        SolicitudGil solicitudGil = solicitudGilRepository.findById(solicitudId)
-                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada por el Id: " + solicitudId));
-
-        if (solicitudGil.getPreFactura() != null) {
-            throw new RuntimeException("Esta Solicitud ya tiene una PreFactura asociada.");
-        }
-
-        if (solicitudGil.getEstado() != EstadoSolicitud.PENDIENTE) {
-            throw new RuntimeException("Solo se pueden asociar prefacturas a solicitudes PENDIENTES.");
-        }
-
-        PreFactura preFactura = preFacturaService.obtenerEntidadPorId(preFacturaId);
-
-        if (preFactura.getEstado() != EstadoPreFactura.VALIDADA) {
-            throw new RuntimeException("Solo se pueden asociar prefacturas en estado VALIDADA.");
-        }
-
-        solicitudGil.setPreFactura(preFactura);
-
-        List<SolicitudItems> nuevosItems = preFactura.getDetalles().stream()
-                .map(detalle -> {
-                    SolicitudItems item = new SolicitudItems();
-                    item.setSolicitudGil(solicitudGil);
-                    item.setBien(detalle.getBien());
-                    item.setCantidad(detalle.getCantidad());
-                    return item;
-                })
-                .collect(Collectors.toList());
-
-        solicitudItemsRepository.saveAll(nuevosItems);
-
-        SolicitudGil solicitudGuardada = solicitudGilRepository.save(solicitudGil);
-        return solicitudGilMapper.toResponseDto(solicitudGuardada);
-    }
     @Transactional
     public SolicitudGilResponseDTO actualizarEstado(Long id, EstadoSolicitud nuevoEstado) {
         SolicitudGil solicitud = solicitudGilRepository.findById(id)

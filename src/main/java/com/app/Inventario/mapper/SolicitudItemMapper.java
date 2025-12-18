@@ -9,33 +9,33 @@ import java.util.stream.Collectors;
 
 @Component
 public class SolicitudItemMapper {
-    private final BienMapper bienMapper;
-
-    public SolicitudItemMapper(BienMapper bienMapper){
-        this.bienMapper = bienMapper;
-    }
 
 
     public SolicitudItemResponseDTO toResponseDto(SolicitudItems solicitudItems){
-
         if (solicitudItems == null){
             return null;
         }
-        SolicitudItemResponseDTO dto = new SolicitudItemResponseDTO();
 
+        SolicitudItemResponseDTO dto = new SolicitudItemResponseDTO();
+        dto.setId(solicitudItems.getId());
         dto.setCantidad(solicitudItems.getCantidad());
-        dto.setBien(bienMapper.toResponseDto(solicitudItems.getBien()));
+
+
+        if (solicitudItems.getBien() != null) {
+            dto.setBienId(solicitudItems.getBien().getId());
+            dto.setBienNombre(solicitudItems.getBien().getNombre());
+            dto.setBienCodigo(solicitudItems.getBien().getCodigo());
+        }
+
         return dto;
     }
 
     public List<SolicitudItemResponseDTO> toResponseDtos(List<SolicitudItems> items){
-        if (items== null){
+        if (items == null){
             return null;
-        }else {
-            return items.stream()
-                    .map(this::toResponseDto)
-                    .collect(Collectors.toList());
         }
+        return items.stream()
+                .map(this::toResponseDto)
+                .collect(Collectors.toList());
     }
-
 }
