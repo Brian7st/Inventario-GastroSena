@@ -18,5 +18,14 @@ public interface PreFacturaRepository extends JpaRepository<PreFactura, Long> {
 
     @Query("SELECT p FROM PreFactura p LEFT JOIN FETCH p.programaFormacion")
     List<PreFactura> findAllWithPrograma();
+
+    @Query("""
+    SELECT DISTINCT pf
+    FROM PreFactura pf
+    LEFT JOIN FETCH pf.detalles d
+    LEFT JOIN FETCH d.bien
+    WHERE pf.id = :id
+""")
+    Optional<PreFactura> findByIdFull(@Param("id") Long id);
 }
 

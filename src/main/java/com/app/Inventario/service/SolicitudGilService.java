@@ -1,107 +1,118 @@
 package com.app.Inventario.service;
 
+import com.app.Inventario.mapper.CuentadanteMapper;
 import com.app.Inventario.mapper.SolicitudGilMapper;
 import com.app.Inventario.model.dto.request.SolicitudGilRequestDTO;
 import com.app.Inventario.model.dto.response.SolicitudGilResponseDTO;
 import com.app.Inventario.model.entity.PreFactura;
 import com.app.Inventario.model.entity.SolicitudGil;
 import com.app.Inventario.model.entity.SolicitudItems;
+import com.app.Inventario.model.entityMaestras.Cuentadante;
 import com.app.Inventario.model.enums.EstadoPreFactura;
 import com.app.Inventario.model.enums.EstadoSolicitud;
+import com.app.Inventario.model.enums.TipoCuentadante;
 import com.app.Inventario.repository.SolicitudGilRepository;
-import com.app.Inventario.repository.SolicitudItemsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class SolicitudGilService {
+
     private final SolicitudGilRepository solicitudGilRepository;
-    private final SolicitudItemsRepository solicitudItemsRepository;
     private final SolicitudGilMapper solicitudGilMapper;
     private final PreFacturaService preFacturaService;
+    private final CuentadanteMapper cuentadanteMapper;
 
     @Transactional
     public SolicitudGilResponseDTO crearSolicitud(SolicitudGilRequestDTO dto) {
-
         PreFactura preFactura = preFacturaService.obtenerEntidadPorId(dto.getPreFacturaId());
 
         if (preFactura.getEstado() != EstadoPreFactura.VALIDADA) {
-            throw new RuntimeException("La PreFactura [" + dto.getPreFacturaId() + "] debe estar VALIDADA para generar una solicitud.");
+            throw new RuntimeException("La PreFactura [" + dto.getPreFacturaId() + "] debe estar VALIDADA.");
         }
 
+        if (dto.getTipoCuentadante() == TipoCuentadante.UNIPERSONAL
+                && dto.getCuentadantes() != null
+                && dto.getCuentadantes().size() > 1) {
+            throw new RuntimeException("Solo se permite un cuentadante cuando el tipo es UNIPERSONAL.");
+        }
 
-        SolicitudGil solicitudGil = solicitudGilMapper.toEntity(dto);
-        solicitudGil.setPreFactura(preFactura);
-        solicitudGil.setEstado(EstadoSolicitud.PENDIENTE);
+        SolicitudGil solicitud = solicitudGilMapper.toEntity(dto);
+        solicitud.setPreFactura(preFactura);
+        solicitud.setEstado(EstadoSolicitud.PENDIENTE);
 
+        // 1. Duplicar y Congelar Items usando Set
+        if (preFactura.getDetalles() != null) {
+            Set<SolicitudItems> items = preFactura.getDetalles().stream()
+                    .map(detalle -> {
+                        SolicitudItems item = new SolicitudItems();
+                        item.setSolicitudGil(solicitud);
+                        item.setBien(detalle.getBien());
+                        item.setCantidad(detalle.getCantidad());
+                        item.setPrecioCongelado(detalle.getPrecioAdjudicado());
+                        item.setTotalLinea(detalle.getTotalLinea());
+                        return item;
+                    })
+                    .collect(Collectors.toSet()); // Cambio a Set
+            solicitud.setItems(items);
+        }
 
-        SolicitudGil saved = solicitudGilRepository.save(solicitudGil);
+        // 2. Vincular Cuentadantes usando Set
+        if (dto.getCuentadantes() != null && !dto.getCuentadantes().isEmpty()) {
+            Set<Cuentadante> cuentadantes = dto.getCuentadantes().stream()
+                    .map(cDto -> {
+                        Cuentadante c = cuentadanteMapper.toEntity(cDto);
+                        c.setSolicitudGil(solicitud);
+                        return c;
+                    })
+                    .collect(Collectors.toSet()); // Cambio a Set
+            solicitud.setCuentadantes(cuentadantes);
+        }
 
-
-        List<SolicitudItems> nuevosItems = preFactura.getDetalles().stream()
-                .map(detalle -> {
-                    SolicitudItems item = new SolicitudItems();
-                    item.setSolicitudGil(saved);
-                    item.setBien(detalle.getBien());
-                    item.setCantidad(detalle.getCantidad());
-                    return item;
-                })
-                .collect(Collectors.toList());
-
-
-        solicitudItemsRepository.saveAll(nuevosItems);
-
-
-        saved.setItems(nuevosItems);
-
+        SolicitudGil saved = solicitudGilRepository.save(solicitud);
         return solicitudGilMapper.toResponseDto(saved);
     }
 
-    public SolicitudGilResponseDTO obtenerId(Long id){
-        SolicitudGil solicitudGil = solicitudGilRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Solicitud no Encontrada Por id: " + id));
-        if (solicitudGil.getItems() != null) solicitudGil.getItems().size();
-        return solicitudGilMapper.toResponseDto(solicitudGil);
-    }
+    @Transactional(readOnly = true)
+    public SolicitudGilResponseDTO obtenerId(Long id) {
+        // findFullById debe realizar LEFT JOIN FETCH de items y cuentadantes
+        SolicitudGil solicitud = solicitudGilRepository.findFullById(id)
+                .orElseThrow(() -> new RuntimeException("Solicitud GIL no encontrada: " + id));
 
-    @Transactional
-    public SolicitudGilResponseDTO actualizarSolicitud(Long id, SolicitudGilRequestDTO dto) {
-        SolicitudGil solicitud = solicitudGilRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada por id: " + id));
-
-        if (solicitud.getEstado() != EstadoSolicitud.PENDIENTE) {
-            throw new RuntimeException("Solo se puede modificar una solicitud en estado PENDIENTE");
-        }
-
-        solicitudGilMapper.updateEntityFromDto(solicitud, dto);
-
-        return solicitudGilMapper.toResponseDto(
-                solicitudGilRepository.save(solicitud)
-        );
+        return solicitudGilMapper.toResponseDto(solicitud);
     }
 
     @Transactional(readOnly = true)
     public List<SolicitudGilResponseDTO> obtenerSolicitudes() {
-        List<SolicitudGil> solicitudes = solicitudGilRepository.findAll();
-        solicitudes.forEach(s -> {
-            if (s.getItems() != null) s.getItems().size();
-        });
-        return solicitudGilMapper.toResponseDtos(solicitudes);
+        return solicitudGilMapper.toResponseDtos(solicitudGilRepository.findAllFull());
+    }
+
+    @Transactional
+    public SolicitudGilResponseDTO actualizarSolicitud(Long id, SolicitudGilRequestDTO dto) {
+        SolicitudGil solicitud = solicitudGilRepository.findFullById(id)
+                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada: " + id));
+
+        if (solicitud.getEstado() != EstadoSolicitud.PENDIENTE) {
+            throw new RuntimeException("Solo se puede modificar una solicitud en estado PENDIENTE.");
+        }
+
+        solicitudGilMapper.updateEntityFromDto(solicitud, dto);
+        return solicitudGilMapper.toResponseDto(solicitudGilRepository.save(solicitud));
     }
 
     @Transactional
     public void borrarSolicitud(Long id) {
         SolicitudGil solicitud = solicitudGilRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada por id: " + id));
+                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada: " + id));
 
         if (solicitud.getEstado() != EstadoSolicitud.PENDIENTE) {
-            throw new RuntimeException("Solo se pueden eliminar solicitudes en estado PENDIENTE");
+            throw new RuntimeException("Solo se pueden eliminar solicitudes en estado PENDIENTE.");
         }
 
         solicitudGilRepository.delete(solicitud);
@@ -109,30 +120,20 @@ public class SolicitudGilService {
 
     @Transactional
     public SolicitudGilResponseDTO actualizarEstado(Long id, EstadoSolicitud nuevoEstado) {
-        SolicitudGil solicitud = solicitudGilRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada por id: " + id));
+        SolicitudGil solicitud = solicitudGilRepository.findFullById(id)
+                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada: " + id));
 
-        EstadoSolicitud estadoActual = solicitud.getEstado();
-
-
-        if (estadoActual == EstadoSolicitud.APROBADA || estadoActual == EstadoSolicitud.RECHAZADA) {
-            throw new RuntimeException("No se puede modificar el estado de una solicitud ya APROBADA o RECHAZADA.");
+        if (solicitud.getEstado() == EstadoSolicitud.APROBADA || solicitud.getEstado() == EstadoSolicitud.RECHAZADA) {
+            throw new RuntimeException("No se puede modificar una solicitud ya finalizada.");
         }
-
-        if (estadoActual == EstadoSolicitud.PENDIENTE && nuevoEstado == EstadoSolicitud.PROCESADA) {
-            throw new RuntimeException("Una solicitud solo puede pasar a PROCESADA después de asociar una PreFactura (usar el método 'asociarPreFactura').");
-        }
-
 
         solicitud.setEstado(nuevoEstado);
-
-
-
-        SolicitudGil updated = solicitudGilRepository.save(solicitud);
-        return solicitudGilMapper.toResponseDto(updated);
+        return solicitudGilMapper.toResponseDto(solicitudGilRepository.save(solicitud));
     }
+
+    @Transactional(readOnly = true)
     public SolicitudGil obtenerEntidadPorId(Long id) {
-        return solicitudGilRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Solicitud GIL no encontrada por id: " + id));
+        return solicitudGilRepository.findFullById(id)
+                .orElseThrow(() -> new RuntimeException("Solicitud GIL no encontrada: " + id));
     }
 }
