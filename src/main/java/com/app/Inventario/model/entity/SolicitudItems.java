@@ -1,13 +1,16 @@
 package com.app.Inventario.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.ToString;
+import lombok.*;
 
 import java.math.BigDecimal;
 
 @Entity
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 @Table (name = "solicitud_gil_items")
 public class SolicitudItems {
 
@@ -16,18 +19,26 @@ public class SolicitudItems {
     private Long id;
 
 
-    @Column(name = "cantidad" , precision = 15, scale = 2, nullable = false)
-    private BigDecimal cantidad;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "solicitud_gil_id", nullable = false)
-    @ToString.Exclude
+    @JsonIgnore
     private SolicitudGil solicitudGil;
 
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bien_id",nullable = false)
     private Bien bien;
+
+
+    @Column(nullable = false, precision = 15, scale = 2)
+    private BigDecimal cantidad;
+
+    @Column(name = "precio_congelado", nullable = false, precision = 15, scale = 2)
+    private BigDecimal precioCongelado;
+
+    @Column(name = "total_linea", precision = 15, scale = 2)
+    private BigDecimal totalLinea;
 
 
     }

@@ -11,24 +11,25 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-
 @Service
 @RequiredArgsConstructor
 public class SolicitudItemsService {
 
-
-
-    private  final SolicitudItemsRepository solicitudItemsRepository;
-    private final  SolicitudGilRepository solicitudGilRepository;
-
+    private final SolicitudItemsRepository solicitudItemsRepository;
+    private final SolicitudGilRepository solicitudGilRepository;
 
     @Transactional
-    public SolicitudItems agregarItems (Long solicitudId, SolicitudItems items){
+    public SolicitudItems agregarItems(Long solicitudId, SolicitudItems items) {
         SolicitudGil solicitudGil = solicitudGilRepository.findById(solicitudId)
-                .orElseThrow(() -> new RuntimeException("Solicitud no encotrada"));
+                .orElseThrow(() -> new RuntimeException("Solicitud no encontrada"));
 
         if (solicitudGil.getEstado() != EstadoSolicitud.PENDIENTE) {
-            throw new RuntimeException("Solo se pueden agregar items cuando la solicitud está PENDIENTE");
+            throw new RuntimeException("Solo se pueden agregar ítems cuando la solicitud está PENDIENTE");
+        }
+
+        // Si manejas lógica de congelación, aquí deberías setear el precio actual del Bien
+        if (items.getBien() != null && items.getPrecioCongelado() == null) {
+            items.setPrecioCongelado(items.getBien().getValorUnitario());
         }
 
         items.setSolicitudGil(solicitudGil);
@@ -36,43 +37,45 @@ public class SolicitudItemsService {
     }
 
     @Transactional
-    public SolicitudItems actualizarItems (Long itemId,SolicitudItems itemsActualizado ){
+    public SolicitudItems actualizarItems(Long itemId, SolicitudItems itemsActualizado) {
         SolicitudItems items = solicitudItemsRepository.findById(itemId)
-                .orElseThrow(()-> new RuntimeException("item no encontrado"));
+                .orElseThrow(() -> new RuntimeException("Ítem no encontrado"));
 
-
-        if (items.getSolicitudGil().getEstado() == EstadoSolicitud.FACTURADA) {
-            throw new RuntimeException("No se pueden modificar items de una solicitud facturada");
+        EstadoSolicitud estado = items.getSolicitudGil().getEstado();
+        if (estado != EstadoSolicitud.PENDIENTE) {
+            throw new RuntimeException("No se pueden modificar ítems de una solicitud en estado: " + estado);
         }
 
         items.setCantidad(itemsActualizado.getCantidad());
         items.setBien(itemsActualizado.getBien());
 
-        return solicitudItemsRepository.save(items);
+        // Actualizar precio congelado si el bien cambió
+        items.setPrecioCongelado(itemsActualizado.getBien().getValorUnitario());
 
+        if (items.getCantidad() != null && items.getPrecioCongelado() != null) {
+            items.setTotalLinea(items.getCantidad().multiply(items.getPrecioCongelado()));
+        }
+
+        return solicitudItemsRepository.save(items);
     }
 
     @Transactional
-    public void eliminarItem (Long itemId){
-
+    public void eliminarItem(Long itemId) {
         SolicitudItems items = solicitudItemsRepository.findById(itemId)
-                        .orElseThrow(()-> new RuntimeException("no se encontro item"));
+                .orElseThrow(() -> new RuntimeException("No se encontró el ítem"));
+
         EstadoSolicitud estadoSolicitud = items.getSolicitudGil().getEstado();
 
-        if (estadoSolicitud == EstadoSolicitud.FACTURADA || estadoSolicitud == EstadoSolicitud.APROBADA){
-
-       throw new RuntimeException("no s epuede eliminar el item de una solicitud aporabado o facturada");
-
-    }   solicitudItemsRepository.deleteById(itemId);
-
-    }
-
-    public List<SolicitudItems> listarItems (Long solicitudId){
-
-        return solicitudItemsRepository.findBySolicitudGilId(solicitudId);
-
+        if (estadoSolicitud != EstadoSolicitud.PENDIENTE) {
+            throw new RuntimeException("No se puede eliminar el ítem de una solicitud ya " + estadoSolicitud);
         }
+
+        solicitudItemsRepository.delete(items);
     }
 
 
-
+    @Transactional(readOnly = true)
+    public List<SolicitudItems> listarItems(Long solicitudId) {
+        return solicitudItemsRepository.findBySolicitudGilIdWithBien(solicitudId);
+    }
+}

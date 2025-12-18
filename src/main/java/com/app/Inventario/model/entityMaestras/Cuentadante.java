@@ -2,11 +2,14 @@ package com.app.Inventario.model.entityMaestras;
 
 import com.app.Inventario.model.entity.SolicitudGil;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 @Entity
 @Table (name = "gil_cuentadantes")
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
 public class Cuentadante {
 
     @Id

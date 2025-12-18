@@ -17,7 +17,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/solicitudes-gil/items")
 @RequiredArgsConstructor
-@Tag(name = "Items de Solicitud GIL", description = "Endpoints para la consulta y eliminación de bienes asociados a una solicitud.")
+@Tag(name = "Items de Solicitud GIL", description = "Operaciones sobre los bienes específicos vinculados a una solicitud.")
 public class SolicitudItemsController {
 
     private final SolicitudItemsService solicitudItemsService;
@@ -25,34 +25,36 @@ public class SolicitudItemsController {
 
     @Operation(
             summary = "Listar ítems de una solicitud",
-            description = "Obtiene todos los bienes y sus cantidades asociados a una solicitud GIL específica."
+            description = "Recupera la lista de bienes asociados a un GIL. Utiliza carga optimizada para evitar errores de sesión."
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Lista de ítems recuperada con éxito"),
-            @ApiResponse(responseCode = "404", description = "La solicitud no existe")
+            @ApiResponse(responseCode = "200", description = "Operación exitosa"),
+            @ApiResponse(responseCode = "404", description = "Solicitud no encontrada")
     })
     @GetMapping("/solicitud/{solicitudId}")
     public ResponseEntity<List<SolicitudItemResponseDTO>> listarItemsPorSolicitud(
             @Parameter(description = "ID de la solicitud GIL", required = true)
             @PathVariable Long solicitudId) {
-        return ResponseEntity.ok(
-                solicitudItemMapper.toResponseDtos(solicitudItemsService.listarItems(solicitudId))
-        );
+
+        var itemsEntidad = solicitudItemsService.listarItems(solicitudId);
+
+        return ResponseEntity.ok(solicitudItemMapper.toResponseDtos(itemsEntidad));
     }
 
     @Operation(
-            summary = "Eliminar un ítem de la solicitud",
-            description = "Elimina un ítem específico. Solo es posible si la solicitud está en estado PENDIENTE."
+            summary = "Eliminar un ítem",
+            description = "Borra un bien de la solicitud. Solo se permite si el GIL está en estado PENDIENTE."
     )
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "204", description = "Ítem eliminado exitosamente"),
-            @ApiResponse(responseCode = "400", description = "No se puede eliminar porque la solicitud ya está aprobada o facturada"),
+            @ApiResponse(responseCode = "204", description = "Ítem eliminado correctamente"),
+            @ApiResponse(responseCode = "403", description = "La solicitud ya ha sido procesada y no permite cambios"),
             @ApiResponse(responseCode = "404", description = "Ítem no encontrado")
     })
     @DeleteMapping("/{itemId}")
     public ResponseEntity<Void> eliminarItem(
-            @Parameter(description = "ID del ítem a eliminar", required = true)
+            @Parameter(description = "ID único del ítem (detalle)", required = true)
             @PathVariable Long itemId) {
+
         solicitudItemsService.eliminarItem(itemId);
         return ResponseEntity.noContent().build();
     }

@@ -5,22 +5,24 @@ import com.app.Inventario.model.enums.DestinoBienes;
 import com.app.Inventario.model.enums.EstadoSolicitud;
 import com.app.Inventario.model.enums.TipoCuentadante;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
-@Entity
-@Table(name = "solicitudes_gil")
-@Data
+
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+@Entity
+@Table(name = "solicitudes_gil")
 public class SolicitudGil {
 
     @Id
@@ -60,7 +62,7 @@ public class SolicitudGil {
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    @Column(columnDefinition = " ENUM('Formación', 'Administrativo') DEFAULT 'Formación'")
+    @Column(columnDefinition = " ENUM('FORMACION', 'ADMINISTRATIVO') DEFAULT 'FORMACION'")
     private DestinoBienes destinoBienes = DestinoBienes.FORMACION;
 
 
@@ -68,11 +70,11 @@ public class SolicitudGil {
     private String fichaCaracterizacion;
 
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pre_factura_id", unique = true)
     private PreFactura preFactura;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "factura_global_id")
     private FacturaGlobal facturaGlobal;
 
@@ -80,9 +82,10 @@ public class SolicitudGil {
     private EstadoSolicitud estado = EstadoSolicitud.PENDIENTE;
 
     @OneToMany(mappedBy = "solicitudGil", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Cuentadante> cuentadantes;
+    private Set<Cuentadante> cuentadantes= new LinkedHashSet<>();;
 
     @OneToMany(mappedBy = "solicitudGil", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SolicitudItems> items;
-
+    @Builder.Default
+    private Set<SolicitudItems> items = new LinkedHashSet<>();
 }
+

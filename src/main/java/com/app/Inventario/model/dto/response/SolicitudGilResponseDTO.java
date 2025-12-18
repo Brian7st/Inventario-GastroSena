@@ -11,6 +11,8 @@ import lombok.NoArgsConstructor;
 import java.time.LocalDate;
 import java.util.List;
 
+
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -31,10 +33,7 @@ public class SolicitudGilResponseDTO {
     private String fichaCaracterizacion;
 
     private Long preFacturaId;
-
-
     private EstadoSolicitud estado;
-
 
     private List<CuentadanteDTO> cuentadantes;
     private List<SolicitudItemResponseDTO> items;

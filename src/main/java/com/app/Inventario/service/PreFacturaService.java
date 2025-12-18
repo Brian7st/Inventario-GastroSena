@@ -65,7 +65,7 @@ public class PreFacturaService {
 
     @Transactional(readOnly = true)
     public PreFacturaResponseDTO obtenerPorId(long id) {
-        PreFactura pf = preFacturaRepository.findById(id)
+        PreFactura pf = preFacturaRepository.findByIdFull(id)
                 .orElseThrow(() -> new RuntimeException("PreFactura no encontrada ID: " + id));
         return mapToResponse(pf);
     }

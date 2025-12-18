@@ -14,7 +14,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
-import java.util.List;
+import java.util.Collection;
+
 
 @Data
 @AllArgsConstructor
@@ -49,13 +50,12 @@ public class SolicitudGilRequestDTO {
     @NotNull(message = "Debe Vincular una Prefactura")
     private Long preFacturaId;
 
-    private Long facturaGlobalId;
 
     private EstadoSolicitud estado;
 
     @Valid
     @Size(min = 1)
-    private List<CuentadanteDTO> cuentadantes;
+    private Collection<CuentadanteDTO> cuentadantes;
 
 
 }

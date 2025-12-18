@@ -4,6 +4,7 @@ import com.app.Inventario.model.dto.CuentadanteDTO;
 import com.app.Inventario.model.entityMaestras.Cuentadante;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -24,16 +25,20 @@ public class CuentadanteMapper {
         return dto;
     }
 
-    public List<CuentadanteDTO> toResponseDtos(List<Cuentadante> cuentadantes){
-        if (cuentadantes == null) {
-            return null;
-        }else {
-            return cuentadantes.stream()
-                    .map(this::toResponseDto)
-                    .collect(Collectors.toList());
-        }
-
+    public List<CuentadanteDTO> toResponseDtos(Collection<Cuentadante> entities) {
+        if (entities == null) return List.of();
+        return entities.stream()
+                .map(this::toResponseDto)
+                .collect(Collectors.toList());
     }
+    public Cuentadante toEntity(CuentadanteDTO dto) {
+        if (dto == null) {
+            return null;
+        }
+        Cuentadante cuentadante = new Cuentadante();
+        cuentadante.setNombre(dto.getNombre());
+        cuentadante.setIdentificacion(dto.getIdentificacion());
 
-
+        return cuentadante;
+    }
 }
